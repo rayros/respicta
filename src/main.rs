@@ -1,5 +1,5 @@
+mod magick;
 mod oxipng;
-
 // use oxipng::optimize;
 
 fn main() {
