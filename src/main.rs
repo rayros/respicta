@@ -1,5 +1,6 @@
 mod magick;
 mod oxipng;
+mod webp;
 // use oxipng::optimize;
 
 fn main() {

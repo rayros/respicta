@@ -7,8 +7,9 @@ static START: Once = Once::new();
 
 pub fn resize_and_auto_orient(
     input_jpg_path: &str,
-    width: usize,
     output_jpg_path: &str,
+    target_width: usize,
+    target_height: usize,
 ) -> Result<(), magick_rust::MagickError> {
     START.call_once(|| {
         magick_wand_genesis();
@@ -16,7 +17,7 @@ pub fn resize_and_auto_orient(
     let wand = MagickWand::new();
     wand.read_image(input_jpg_path)?;
     wand.auto_orient();
-    wand.fit(width, wand.get_image_height());
+    wand.fit(target_width, target_height);
     wand.write_image(output_jpg_path)
 }
 
@@ -31,6 +32,6 @@ mod tests {
         // Specify the output PNG file path (optional)
         let output_png_path = "target/out_image_1.jpg";
 
-        resize_and_auto_orient(input_jpg_path, 240, output_png_path)
+        resize_and_auto_orient(input_jpg_path, output_png_path, 240, 0)
     }
 }
