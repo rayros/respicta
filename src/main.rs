@@ -1,4 +1,5 @@
 mod magick;
+mod mozjpeg;
 mod oxipng;
 mod webp;
 // use oxipng::optimize;
