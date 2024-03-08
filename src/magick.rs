@@ -31,7 +31,7 @@ mod tests {
     fn magic_resize_and_auto_orient() -> Result<(), magick_rust::MagickError> {
         use super::*;
         // Specify the input PNG file path
-        let input_jpg_path = "tests/files/img20230418182427.jpg";
+        let input_jpg_path = "tests/files/orientation_test.jpg";
 
         // Specify the output PNG file path (optional)
         let output_png_path = "target/magick_out.jpg";
