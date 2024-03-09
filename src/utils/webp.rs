@@ -1,6 +1,6 @@
 use image::GenericImageView;
 use libwebp_sys::{
-    VP8StatusCode, WebPConfig, WebPEncode, WebPEncodingError, WebPMemoryWrite,
+    VP8StatusCode, WebPConfig, WebPEncode, WebPEncodingError, WebPMemoryWrite, WebPMemoryWriter,
     WebPMemoryWriterInit, WebPPicture, WebPPictureFree, WebPPictureImportRGBA, WebPPictureRescale,
     WebPValidateConfig,
 };
@@ -26,9 +26,9 @@ pub fn optimize(
     picture.width = dimensions.0 as i32;
     picture.height = dimensions.1 as i32;
 
-    let mut ww = std::mem::MaybeUninit::uninit();
+    let mut ww: ::core::mem::MaybeUninit<WebPMemoryWriter> = ::core::mem::MaybeUninit::uninit();
     picture.writer = Some(WebPMemoryWrite);
-    picture.custom_ptr = ww.as_mut_ptr() as *mut std::ffi::c_void;
+    picture.custom_ptr = ww.as_mut_ptr().cast::<std::ffi::c_void>();
 
     unsafe {
         if WebPValidateConfig(&config) == 0 {

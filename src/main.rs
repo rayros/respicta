@@ -1,25 +1,23 @@
-use std::ffi::CString;
-
-mod magick;
-mod oxipng;
-mod webp;
-use oxipng::optimize;
+use image_resizer::utils::gifsicle;
+use image_resizer::utils::magick;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     magick::resize_and_auto_orient(
-        "tests/files/img20230418182427.jpg",
+        "tests/files/orientation_test.jpg",
         "target/magick_out_image_1.jpg",
         240,
         100,
     )?;
-    let args: Vec<_> = std::env::args()
-        .map(|arg| CString::new(arg).unwrap())
-        .collect();
-    let argv: Vec<_> = args.iter().map(|a| a.as_ptr()).collect();
+    let input_path = "tests/files/test1.gif";
 
-    unsafe {
-        gifsicle::gifsicle_main(argv.len() as _, argv.as_ptr());
-    }
+    // Specify the output PNG file path (optional)
+    let output_path = "target/gifsicle_test1.gif";
+
+    gifsicle::optimize(&gifsicle::Config {
+        input_path,
+        output_path,
+        width: Some(100),
+    });
 
     // Specify the input PNG file path
     // optimize(input_png_path, output_png_path)
