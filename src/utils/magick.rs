@@ -1,3 +1,4 @@
+use magick_rust::{magick_wand_genesis, MagickWand};
 use std::sync::Once;
 
 // Used to make sure MagickWand is initialized exactly once. Note that we
@@ -11,7 +12,10 @@ pub fn resize_and_auto_orient(
     target_width: usize,
     target_height: usize,
 ) -> Result<(), magick_rust::MagickError> {
-    use magick_rust::{magick_wand_genesis, MagickWand};
+    println!(
+        "MAGICK: Resizing and auto orienting image: {} -> {}",
+        input_jpg_path, output_jpg_path
+    );
 
     START.call_once(|| {
         magick_wand_genesis();

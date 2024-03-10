@@ -1,6 +1,10 @@
 use oxipng::{Options, OutFile};
 
 pub fn optimize(input_png_path: &str, output_png_path: &str) -> Result<(), oxipng::PngError> {
+    println!(
+        "OXIPNG: Optimizing PNG file: {} -> {}",
+        input_png_path, output_png_path
+    );
     // Set up the optimization options
     let options = Options {
         strip: oxipng::StripChunks::Safe, // Optionally, strip metadata

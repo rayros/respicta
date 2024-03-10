@@ -1,5 +1,4 @@
-use std::ffi::CString;
-
+use std::str::FromStr;
 pub struct Config<'a> {
     pub input_path: &'a str,
     pub output_path: &'a str,
@@ -7,7 +6,8 @@ pub struct Config<'a> {
 }
 
 impl Config<'_> {
-    pub fn to_args(&self) -> Vec<CString> {
+    pub fn to_args(&self) -> Vec<String> {
+        println!("To args: {:?}", self.width);
         let input = vec![self.input_path];
         let optional_width = if let Some(width) = self.width {
             vec!["--resize-width".to_string(), width.to_string()]
@@ -25,19 +25,28 @@ impl Config<'_> {
         ]
         .concat()
         .into_iter()
-        .map(|arg| CString::new(arg).unwrap())
+        .map(|arg| String::from_str(arg).unwrap())
         .collect();
         args
     }
 }
 
-pub fn optimize(config: &Config) {
-    let args: Vec<CString> = config.to_args();
-    let gifsicle_argv: Vec<*const i8> = args.iter().map(|a| a.as_ptr()).collect();
-    let gifsicle_argv_len = i32::try_from(gifsicle_argv.len()).unwrap();
-    unsafe {
-        gifsicle::gifsicle_main(gifsicle_argv_len, gifsicle_argv.as_ptr());
-    }
+pub fn optimize(config: Config) {
+    println!(
+        "GIFSICLE: Optimizing gif file: {} -> {}",
+        config.input_path, config.output_path
+    );
+    let args = config.to_args().join(" ");
+    let command = format!("gifsicle {args}");
+    println!("Command: {:?}", command);
+    let output = std::process::Command::new("sh")
+        .arg("-c")
+        .arg(command)
+        .output()
+        .expect("failed to execute process");
+    println!("status: {}", output.status);
+    println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
+    println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
 }
 
 #[cfg(test)]
@@ -45,15 +54,10 @@ mod tests {
     #[test]
     fn gifsicle() {
         use super::*;
-        // Specify the input PNG file path
-        let input_path = "tests/files/test1.gif";
 
-        // Specify the output PNG file path (optional)
-        let output_path = "target/gifsicle_test1.gif";
-
-        optimize(&Config {
-            input_path,
-            output_path,
+        optimize(Config {
+            input_path: "tests/files/gifsicle_test1.gif",
+            output_path: "target/gifsicle_test1.gif",
             width: Some(100),
         });
     }

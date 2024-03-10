@@ -6,7 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-gifsicle = "1.94.0"
 image = "0.24.9"
 libwebp-sys = "0.9.5"
 magick_rust = "0.20.0"

@@ -11,6 +11,11 @@ pub fn optimize(
     target_width: i32,
     target_height: i32,
 ) -> std::result::Result<(), libwebp_sys::WebPEncodingError> {
+    println!(
+        "WEBP: Optimizing image file: {} -> {}",
+        input_path, output_path
+    );
+
     let input_image = image::open(input_path).expect("Failed to open input image");
 
     let dimensions = input_image.dimensions();
@@ -55,8 +60,19 @@ pub fn optimize(
     Ok(())
 }
 
-pub fn optimize_gif(input_path: &str, output_path: &str) {
-    let command = format!("gif2webp -o {output_path} -q 100 -m 6 -mt -v {input_path}",);
+pub struct GifConfig<'a> {
+    pub input_path: &'a str,
+    pub output_path: &'a str,
+}
+
+pub fn optimize_gif(config: &GifConfig) {
+    println!(
+        "WEBP: Optimizing gif file: {} -> {}",
+        config.input_path, config.output_path
+    );
+    let input_path = config.input_path;
+    let output_path = config.output_path;
+    let command = format!("gif2webp -o {output_path} -q 75 -m 6 -mt -v {input_path}",);
     let output = std::process::Command::new("sh")
         .arg("-c")
         .arg(command)
@@ -93,10 +109,10 @@ mod tests {
     #[test]
     fn webp_optimize_gif_to_webp_2() {
         use super::*;
-        let input_png_path = "tests/files/test1.gif";
 
-        let output_webp_path = "target/webp_gif_test1.webp";
-
-        optimize_gif(input_png_path, output_webp_path);
+        optimize_gif(&GifConfig {
+            input_path: "tests/files/test1.gif",
+            output_path: "target/webp_gif_test1.webp",
+        });
     }
 }
