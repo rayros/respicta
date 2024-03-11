@@ -5,26 +5,28 @@ use libwebp_sys::{
     WebPValidateConfig,
 };
 
-pub fn optimize(
-    input_path: &str,
-    output_path: &str,
-    target_width: i32,
-    target_height: i32,
-) -> std::result::Result<(), libwebp_sys::WebPEncodingError> {
+pub struct Config<'a> {
+    pub input_path: &'a str,
+    pub output_path: &'a str,
+    pub width: Option<i32>,
+    pub height: Option<i32>,
+}
+
+pub fn optimize(config: &Config) -> std::result::Result<(), libwebp_sys::WebPEncodingError> {
     println!(
         "WEBP: Optimizing image file: {} -> {}",
-        input_path, output_path
+        config.input_path, config.output_path
     );
 
-    let input_image = image::open(input_path).expect("Failed to open input image");
+    let input_image = image::open(config.input_path).expect("Failed to open input image");
 
     let dimensions = input_image.dimensions();
     let rgba_image = input_image.into_rgba8();
 
-    let mut config = WebPConfig::new().unwrap();
-    config.lossless = 0;
-    config.alpha_compression = 1;
-    config.quality = 1.0;
+    let mut webp_config = WebPConfig::new().unwrap();
+    webp_config.lossless = 0;
+    webp_config.alpha_compression = 1;
+    webp_config.quality = 1.0;
 
     let mut picture = WebPPicture::new().unwrap();
     picture.use_argb = 1;
@@ -36,7 +38,7 @@ pub fn optimize(
     picture.custom_ptr = ww.as_mut_ptr().cast::<std::ffi::c_void>();
 
     unsafe {
-        if WebPValidateConfig(&config) == 0 {
+        if WebPValidateConfig(&webp_config) == 0 {
             return Err(WebPEncodingError::VP8_ENC_ERROR_INVALID_CONFIGURATION);
         }
         WebPMemoryWriterInit(ww.as_mut_ptr());
@@ -45,14 +47,16 @@ pub fn optimize(
             rgba_image.as_ptr(),
             i32::try_from(dimensions.0).unwrap() * 4,
         );
+        let target_width = config.width.unwrap_or(0);
+        let target_height = config.height.unwrap_or(0);
         WebPPictureRescale(&mut picture, target_width, target_height);
-        let encode_result = WebPEncode(&config, &mut picture);
+        let encode_result = WebPEncode(&webp_config, &mut picture);
         if encode_result == VP8StatusCode::VP8_STATUS_OK as i32 {
             return Err(picture.error_code);
         }
         let ww = ww.assume_init();
         let contents = std::slice::from_raw_parts(ww.mem, ww.size);
-        std::fs::write(output_path, contents).unwrap();
+        std::fs::write(config.output_path, contents).unwrap();
 
         WebPPictureFree(&mut picture);
     }
@@ -89,21 +93,25 @@ mod tests {
     #[test]
     fn webp_optimize_png_to_webp() -> Result<(), libwebp_sys::WebPEncodingError> {
         use super::*;
-        let input_png_path = "tests/files/issue-159.png";
 
-        let output_webp_path = "target/issue-159.webp";
-
-        optimize(input_png_path, output_webp_path, 100, 0)
+        optimize(&Config {
+            input_path: "tests/files/issue-159.png",
+            output_path: "target/issue-159.webp",
+            width: Some(100),
+            height: Some(100),
+        })
     }
 
     #[test]
     fn webp_optimize_gif_to_webp_static() -> Result<(), libwebp_sys::WebPEncodingError> {
         use super::*;
-        let input_png_path = "tests/files/test1.gif";
 
-        let output_webp_path = "target/gif_test1_static.webp";
-
-        optimize(input_png_path, output_webp_path, 0, 0)
+        optimize(&Config {
+            input_path: "tests/files/test1.gif",
+            output_path: "target/gif_test1_static.webp",
+            width: Some(100),
+            height: Some(100),
+        })
     }
 
     #[test]

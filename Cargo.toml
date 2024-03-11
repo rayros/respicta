@@ -6,7 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-image = "0.24.9"
+anyhow = "1.0.80"
+image = "0.25.0"
 libwebp-sys = "0.9.5"
 magick_rust = "0.20.0"
 oxipng = "9.0.0"

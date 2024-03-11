@@ -13,7 +13,7 @@ pub fn get_fullfilepath_without_extension(input_path: &str) -> String {
     format!("{}/{}", parent, file_stem)
 }
 
-pub fn optimize(config: &Config) {
+pub fn convert(config: &Config) {
     let step1_output = format!(
         "{}_step1.gif",
         get_fullfilepath_without_extension(config.output_path)
@@ -37,7 +37,7 @@ mod tests {
     fn gif2webp() {
         use super::*;
 
-        optimize(&Config {
+        convert(&Config {
             input_path: "tests/files/gif2webp_test1.gif",
             output_path: "target/gif2webp_test1.webp",
             width: Some(100),
