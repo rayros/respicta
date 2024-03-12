@@ -69,7 +69,7 @@ pub struct GifConfig<'a> {
     pub output_path: &'a str,
 }
 
-pub fn optimize_gif(config: &GifConfig) {
+pub fn optimize_gif(config: &GifConfig) -> std::result::Result<(), std::io::Error> {
     println!(
         "WEBP: Optimizing gif file: {} -> {}",
         config.input_path, config.output_path
@@ -80,11 +80,11 @@ pub fn optimize_gif(config: &GifConfig) {
     let output = std::process::Command::new("sh")
         .arg("-c")
         .arg(command)
-        .output()
-        .expect("failed to execute process");
+        .output()?;
     println!("status: {}", output.status);
     println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
     println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
+    Ok(())
 }
 
 #[cfg(test)]
@@ -121,6 +121,7 @@ mod tests {
         optimize_gif(&GifConfig {
             input_path: "tests/files/test1.gif",
             output_path: "target/webp_gif_test1.webp",
-        });
+        })
+        .unwrap();
     }
 }

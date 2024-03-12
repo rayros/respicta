@@ -31,22 +31,31 @@ impl Config<'_> {
     }
 }
 
-pub fn optimize(config: Config) {
+pub fn optimize(config: Config) -> std::result::Result<(), std::io::Error> {
     println!(
         "GIFSICLE: Optimizing gif file: {} -> {}",
         config.input_path, config.output_path
     );
     let args = config.to_args().join(" ");
     let command = format!("gifsicle {args}");
-    println!("Command: {:?}", command);
     let output = std::process::Command::new("sh")
         .arg("-c")
         .arg(command)
-        .output()
-        .expect("failed to execute process");
+        .output()?;
+
     println!("status: {}", output.status);
     println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
     println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
+
+    let code = output.status.code();
+
+    match code {
+        Some(0) => Ok(()),
+        Some(_) | None => Err(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "Gifsicle failed",
+        )),
+    }
 }
 
 #[cfg(test)]

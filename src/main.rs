@@ -1,13 +1,6 @@
 use image_resizer::utils::gifsicle;
 use image_resizer::utils::magick;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    magick::resize_and_auto_orient(
-        "tests/files/orientation_test.jpg",
-        "target/magick_out_image_1.jpg",
-        240,
-        100,
-    )?;
-
     let input_path = "tests/files/test1.gif";
 
     // Specify the output PNG file path (optional)

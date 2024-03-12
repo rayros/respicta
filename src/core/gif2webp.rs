@@ -13,7 +13,7 @@ pub fn get_fullfilepath_without_extension(input_path: &str) -> String {
     format!("{}/{}", parent, file_stem)
 }
 
-pub fn convert(config: &Config) {
+pub fn convert(config: &Config) -> std::result::Result<(), std::io::Error> {
     let step1_output = format!(
         "{}_step1.gif",
         get_fullfilepath_without_extension(config.output_path)
@@ -22,13 +22,14 @@ pub fn convert(config: &Config) {
         input_path: config.input_path,
         output_path: step1_output.as_str(),
         width: config.width,
-    });
+    })?;
     webp::optimize_gif(&webp::GifConfig {
         input_path: step1_output.as_str(),
         output_path: config.output_path,
-    });
+    })?;
     // remove the temporary file
-    std::fs::remove_file(step1_output).unwrap();
+    std::fs::remove_file(step1_output)?;
+    Ok(())
 }
 
 #[cfg(test)]
@@ -41,6 +42,9 @@ mod tests {
             input_path: "tests/files/gif2webp_test1.gif",
             output_path: "target/gif2webp_test1.webp",
             width: Some(100),
-        });
+        })
+        .unwrap();
     }
+
+    // TODO add panic test
 }
