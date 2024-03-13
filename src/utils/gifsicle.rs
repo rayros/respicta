@@ -68,6 +68,7 @@ mod tests {
             input_path: "tests/files/gifsicle_test1.gif",
             output_path: "target/gifsicle_test1.gif",
             width: Some(100),
-        });
+        })
+        .unwrap();
     }
 }

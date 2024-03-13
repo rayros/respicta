@@ -1,5 +1,4 @@
 use image_resizer::utils::gifsicle;
-use image_resizer::utils::magick;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let input_path = "tests/files/test1.gif";
 

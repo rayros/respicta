@@ -1,4 +1,4 @@
-use crate::core::{gif2gif, gif2webp, jpeg2jpeg, jpeg2webp, png2webp, webp2webp};
+use crate::core::{gif2gif, gif2webp, jpeg2jpeg, jpeg2webp, png2png, png2webp, webp2webp};
 
 pub struct Config<'a> {
     pub input_path: &'a str,
@@ -62,6 +62,13 @@ pub fn convert(config: &Config) -> anyhow::Result<()> {
             })
             .map_err(|e| anyhow::anyhow!("Error converting jpg to jpg: {:?}", e))
         }
+        ("png", "png") => png2png::convert(&png2png::Config {
+            input_path,
+            output_path,
+            width,
+            height,
+        })
+        .map_err(|e| anyhow::anyhow!("Error converting png to png: {:?}", e)),
         _ => anyhow::bail!(
             "Unsupported conversion: {} -> {}",
             input_extension,

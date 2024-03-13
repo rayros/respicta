@@ -1,9 +1,14 @@
 use oxipng::{Options, OutFile};
 
-pub fn optimize(input_png_path: &str, output_png_path: &str) -> Result<(), oxipng::PngError> {
+pub struct Config<'a> {
+    pub input_path: &'a str,
+    pub output_path: &'a str,
+}
+
+pub fn optimize(config: &Config) -> Result<(), oxipng::PngError> {
     println!(
         "OXIPNG: Optimizing PNG file: {} -> {}",
-        input_png_path, output_png_path
+        config.input_path, config.output_path
     );
     // Set up the optimization options
     let options = Options {
@@ -13,8 +18,8 @@ pub fn optimize(input_png_path: &str, output_png_path: &str) -> Result<(), oxipn
 
     // Perform PNG optimization
     oxipng::optimize(
-        &input_png_path.into(),
-        &OutFile::from_path(output_png_path.into()),
+        &config.input_path.into(),
+        &OutFile::from_path(config.output_path.into()),
         &options,
     )
 }
@@ -22,14 +27,13 @@ pub fn optimize(input_png_path: &str, output_png_path: &str) -> Result<(), oxipn
 #[cfg(test)]
 mod tests {
     #[test]
-    fn oxipng_optimize() -> Result<(), oxipng::PngError> {
+    fn oxipng_optimize() {
         use super::*;
-        // Specify the input PNG file path
-        let input_png_path = "tests/files/issue-159.png";
 
-        // Specify the output PNG file path (optional)
-        let output_png_path = "target/issue-159.png";
-
-        optimize(input_png_path, output_png_path)
+        optimize(&Config {
+            input_path: "tests/files/issue-159.png",
+            output_path: "target/issue-159.png",
+        })
+        .unwrap();
     }
 }

@@ -6,18 +6,15 @@ pub struct Config<'a> {
     pub width: Option<i32>,
 }
 
-pub fn get_fullfilepath_without_extension(input_path: &str) -> String {
+pub fn path_without_extension(input_path: &str) -> String {
     let path = std::path::Path::new(input_path);
     let file_stem = path.file_stem().unwrap().to_str().unwrap();
     let parent = path.parent().unwrap().to_str().unwrap();
-    format!("{}/{}", parent, file_stem)
+    format!("{parent}/{file_stem}")
 }
 
 pub fn convert(config: &Config) -> std::result::Result<(), std::io::Error> {
-    let step1_output = format!(
-        "{}_step1.gif",
-        get_fullfilepath_without_extension(config.output_path)
-    );
+    let step1_output = format!("{}_step1.gif", path_without_extension(config.output_path));
     gifsicle::optimize(gifsicle::Config {
         input_path: config.input_path,
         output_path: step1_output.as_str(),
@@ -27,7 +24,6 @@ pub fn convert(config: &Config) -> std::result::Result<(), std::io::Error> {
         input_path: step1_output.as_str(),
         output_path: config.output_path,
     })?;
-    // remove the temporary file
     std::fs::remove_file(step1_output)?;
     Ok(())
 }

@@ -27,6 +27,7 @@ mod tests {
             output_path: "target/jpeg2jpeg_test1.jfif",
             width: Some(100),
             height: None,
-        });
+        })
+        .unwrap();
     }
 }
