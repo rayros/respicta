@@ -24,11 +24,15 @@ pub fn optimize(config: &Config) -> Result<(), magick_rust::MagickError> {
     });
     let mut wand = MagickWand::new();
     wand.read_image(config.input_path)?;
+
+    let width = config.width.map_or(wand.get_image_width(), |s| s as usize);
+    let height = config
+        .height
+        .map_or(wand.get_image_height(), |s| s as usize);
+
+    wand.fit(width, height);
     wand.auto_orient();
     wand.strip_image()?;
-    let width = config.width.unwrap_or(0);
-    let height = config.height.unwrap_or(0);
-    wand.fit(width as usize, height as usize);
     wand.set_image_compression_quality(75)?;
 
     wand.write_image(config.output_path)
