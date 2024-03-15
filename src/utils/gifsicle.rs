@@ -3,6 +3,7 @@ pub struct Config<'a> {
     pub input_path: &'a str,
     pub output_path: &'a str,
     pub width: Option<i32>,
+    pub height: Option<i32>,
 }
 
 impl Config<'_> {
@@ -14,13 +15,23 @@ impl Config<'_> {
         } else {
             vec![]
         };
+        let optional_height = if let Some(height) = self.height {
+            vec!["--resize-height".to_string(), height.to_string()]
+        } else {
+            vec![]
+        };
         let optional_width_vec_str: Vec<&str> = optional_width
+            .iter()
+            .map(std::string::String::as_str)
+            .collect();
+        let optional_height_vec_str: Vec<&str> = optional_height
             .iter()
             .map(std::string::String::as_str)
             .collect();
         let args: Vec<_> = [
             vec!["", "-O3", "--output", self.output_path],
             optional_width_vec_str,
+            optional_height_vec_str,
             input,
         ]
         .concat()
@@ -32,10 +43,6 @@ impl Config<'_> {
 }
 
 pub fn optimize(config: Config) -> std::result::Result<(), std::io::Error> {
-    println!(
-        "GIFSICLE: Optimizing gif file: {} -> {}",
-        config.input_path, config.output_path
-    );
     let args = config.to_args().join(" ");
     let command = format!("gifsicle {args}");
     let output = std::process::Command::new("sh")
@@ -68,6 +75,7 @@ mod tests {
             input_path: "tests/files/gifsicle_test1.gif",
             output_path: "target/gifsicle_test1.gif",
             width: Some(100),
+            height: None,
         })
         .unwrap();
     }

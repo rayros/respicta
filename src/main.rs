@@ -9,6 +9,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         input_path,
         output_path,
         width: Some(100),
+        height: Some(100),
     });
 
     Ok(())

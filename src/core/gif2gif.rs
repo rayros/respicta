@@ -4,6 +4,7 @@ pub struct Config<'a> {
     pub input_path: &'a str,
     pub output_path: &'a str,
     pub width: Option<i32>,
+    pub height: Option<i32>,
 }
 
 pub fn convert(config: &Config) -> std::result::Result<(), std::io::Error> {
@@ -11,6 +12,7 @@ pub fn convert(config: &Config) -> std::result::Result<(), std::io::Error> {
         input_path: config.input_path,
         output_path: config.output_path,
         width: config.width,
+        height: config.height,
     })
 }
 
@@ -24,6 +26,7 @@ mod tests {
             input_path: "tests/files/gif2gif_test1.gif",
             output_path: "target/gif2gif_test1.gif",
             width: Some(100),
+            height: None,
         })
         .unwrap();
     }
@@ -37,6 +40,7 @@ mod tests {
             input_path: "tests/files/gif2gif_notexisting_test1.gif",
             output_path: "target/gif2gif_test1.gif",
             width: Some(100),
+            height: None,
         })
         .unwrap();
     }

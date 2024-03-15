@@ -24,12 +24,14 @@ pub fn convert(config: &Config) -> anyhow::Result<()> {
             input_path,
             output_path,
             width,
+            height,
         })
         .map_err(|e| anyhow::anyhow!("Error converting gif to gif: {:?}", e)),
         ("gif", "webp") => gif2webp::convert(&gif2webp::Config {
             input_path,
             output_path,
             width,
+            height,
         })
         .map_err(|e| anyhow::anyhow!("Error converting gif to webp: {:?}", e)),
         ("png", "webp") => png2webp::convert(&png2webp::Config {
