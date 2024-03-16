@@ -14,11 +14,6 @@ pub struct Config<'a> {
 }
 
 pub fn optimize(config: &Config) -> Result<(), magick_rust::MagickError> {
-    println!(
-        "MAGICK: Resizing and auto orienting image: {} -> {}",
-        config.input_path, config.output_path
-    );
-
     START.call_once(|| {
         magick_wand_genesis();
     });

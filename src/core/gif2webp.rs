@@ -46,7 +46,6 @@ mod tests {
         .unwrap();
     }
 
-    // TODO add panic test
     #[test]
     #[should_panic]
     fn gif2webp_panic() {

@@ -30,4 +30,18 @@ mod tests {
         })
         .unwrap();
     }
+
+    #[test]
+    #[should_panic]
+    fn jpeg2jpeg_panic() {
+        use super::*;
+
+        convert(&Config {
+            input_path: "tests/files/jpeg2jpeg_notexisting_test1.jpg",
+            output_path: "target/jpeg2jpeg_test1.jfif",
+            width: Some(100),
+            height: None,
+        })
+        .unwrap();
+    }
 }
