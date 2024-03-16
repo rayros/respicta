@@ -8,26 +8,27 @@ pub struct Config<'a> {
 }
 
 #[must_use]
-pub fn path_without_extension(input_path: &str) -> String {
+pub fn path_without_extension(input_path: &str) -> Option<String> {
     let path = std::path::Path::new(input_path);
-    let file_stem = path.file_stem().unwrap().to_str().unwrap();
-    let parent = path.parent().unwrap().to_str().unwrap();
-    format!("{parent}/{file_stem}")
+    let file_stem = path.file_stem().map(|s| s.to_str())?;
+    let parent = path.parent().map(|p| p.to_str())?;
+    parent.and_then(|p| file_stem.map(|f| format!("{p}/{f}")))
 }
 
 pub fn convert(config: &Config) -> std::result::Result<(), std::io::Error> {
-    let step1_output = format!("{}_step1.gif", path_without_extension(config.output_path));
+    let output_path_without_extension = path_without_extension(config.output_path).unwrap();
+    let step1_output_path = format!("{output_path_without_extension}_step1.gif");
     gifsicle::optimize(gifsicle::Config {
         input_path: config.input_path,
-        output_path: step1_output.as_str(),
+        output_path: step1_output_path.as_str(),
         width: config.width,
         height: config.height,
     })?;
     webp::optimize_gif(&webp::GifConfig {
-        input_path: step1_output.as_str(),
+        input_path: step1_output_path.as_str(),
         output_path: config.output_path,
     })?;
-    std::fs::remove_file(step1_output)?;
+    std::fs::remove_file(step1_output_path)?;
     Ok(())
 }
 

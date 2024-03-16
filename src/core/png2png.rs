@@ -12,7 +12,8 @@ pub struct Config<'a> {
 }
 
 pub fn convert(config: &Config) -> Result<(), Box<dyn Error>> {
-    let step1_output = format!("{}_step1.png", path_without_extension(config.output_path));
+    let output_path_without_extension = path_without_extension(config.output_path).unwrap();
+    let step1_output = format!("{output_path_without_extension}_step1.png");
 
     magick::optimize(&magick::Config {
         input_path: config.input_path,
@@ -37,6 +38,20 @@ mod tests {
 
         convert(&Config {
             input_path: "tests/files/png2png_test1.png",
+            output_path: "target/png2png_test1.png",
+            width: Some(100),
+            height: None,
+        })
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn png2png_panic() {
+        use super::*;
+
+        convert(&Config {
+            input_path: "tests/files/png2png_notexisting_test1.png",
             output_path: "target/png2png_test1.png",
             width: Some(100),
             height: None,
