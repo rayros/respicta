@@ -94,12 +94,28 @@ mod tests {
             width: Some(100),
             height: None,
         })?;
+
         convert(&Config {
             input_path: "tests/files/orientation_test.jpeg",
             output_path: "target/test1.webp",
             width: Some(100),
             height: None,
         })?;
+
         Ok(())
+    }
+
+    #[test]
+    #[should_panic]
+    fn convert_panic() {
+        use super::*;
+
+        convert(&Config {
+            input_path: "tests/files/not_existing.jpg",
+            output_path: "target/test1.tiff",
+            width: Some(100),
+            height: None,
+        })
+        .unwrap();
     }
 }
