@@ -106,7 +106,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic = "Unsupported conversion: jpg -> tiff"]
     fn convert_panic() {
         use super::*;
 
