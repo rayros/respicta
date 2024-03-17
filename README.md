@@ -11,3 +11,4 @@ Image Resizer is a versatile project offering a library, command-line interface 
 **CLI**: Intuitive command-line interface for quick resizing and format conversion.
 
 **Web Service**: Host a web service to resize images on-the-fly.
+
