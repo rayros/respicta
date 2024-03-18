@@ -134,5 +134,15 @@ mod tests {
         .unwrap();
     }
 
-    // TODO add panic test
+    #[test]
+    #[should_panic = "gif2webp failed"]
+    fn webp_optimize_gif_to_webp_panic() {
+        use super::*;
+
+        optimize_gif(&GifConfig {
+            input_path: "tests/files/not_existing.gif",
+            output_path: "target/webp_gif_test1.webp",
+        })
+        .unwrap();
+    }
 }
