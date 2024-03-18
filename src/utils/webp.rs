@@ -84,7 +84,16 @@ pub fn optimize_gif(config: &GifConfig) -> std::result::Result<(), std::io::Erro
     println!("status: {}", output.status);
     println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
     println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
-    Ok(())
+
+    let code = output.status.code();
+
+    match code {
+        Some(0) => Ok(()),
+        Some(_) | None => Err(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "gif2webp failed",
+        )),
+    }
 }
 
 #[cfg(test)]
@@ -124,4 +133,6 @@ mod tests {
         })
         .unwrap();
     }
+
+    // TODO add panic test
 }
