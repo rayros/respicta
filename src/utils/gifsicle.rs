@@ -60,7 +60,7 @@ pub fn optimize(config: Config) -> std::result::Result<(), std::io::Error> {
         Some(0) => Ok(()),
         Some(_) | None => Err(std::io::Error::new(
             std::io::ErrorKind::Other,
-            "Gifsicle failed",
+            "gifsicle failed",
         )),
     }
 }
