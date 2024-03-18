@@ -79,4 +79,17 @@ mod tests {
         })
         .unwrap();
     }
+
+    #[test]
+    fn gifsicle_without_width_and_height() {
+        use super::*;
+
+        optimize(Config {
+            input_path: "tests/files/gifsicle_test1.gif",
+            output_path: "target/gifsicle_without_width_and_height_test2.gif",
+            width: None,
+            height: None,
+        })
+        .unwrap();
+    }
 }
