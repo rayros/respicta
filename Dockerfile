@@ -3,7 +3,7 @@ FROM rust:latest as build
 WORKDIR /
 
 RUN apt-get update \
- && apt-get -y install curl build-essential clang pkg-config libjpeg-turbo-progs libpng-dev gifsicle \
+ && apt-get -y install curl build-essential clang pkg-config libjpeg-turbo-progs libpng-dev gifsicle webp \
  && rm -rfv /var/lib/apt/lists/*
 
 ENV MAGICK_VERSION 7.1.1-29
