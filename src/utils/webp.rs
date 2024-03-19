@@ -1,8 +1,8 @@
+use anyhow::bail;
 use image::GenericImageView;
 use libwebp_sys::{
-    VP8StatusCode, WebPConfig, WebPEncode, WebPEncodingError, WebPMemoryWrite, WebPMemoryWriter,
-    WebPMemoryWriterInit, WebPPicture, WebPPictureFree, WebPPictureImportRGBA, WebPPictureRescale,
-    WebPValidateConfig,
+    VP8StatusCode, WebPConfig, WebPEncode, WebPMemoryWrite, WebPMemoryWriter, WebPMemoryWriterInit,
+    WebPPicture, WebPPictureFree, WebPPictureImportRGBA, WebPPictureRescale, WebPValidateConfig,
 };
 
 pub struct Config<'a> {
@@ -12,13 +12,13 @@ pub struct Config<'a> {
     pub height: Option<i32>,
 }
 
-pub fn optimize(config: &Config) -> std::result::Result<(), libwebp_sys::WebPEncodingError> {
+pub fn optimize(config: &Config) -> anyhow::Result<()> {
     println!(
         "WEBP: Optimizing image file: {} -> {}",
         config.input_path, config.output_path
     );
 
-    let input_image = image::open(config.input_path).expect("Failed to open input image");
+    let input_image = image::open(config.input_path)?;
 
     let dimensions = input_image.dimensions();
     let rgba_image = input_image.into_rgba8();
@@ -39,7 +39,7 @@ pub fn optimize(config: &Config) -> std::result::Result<(), libwebp_sys::WebPEnc
 
     unsafe {
         if WebPValidateConfig(&webp_config) == 0 {
-            return Err(WebPEncodingError::VP8_ENC_ERROR_INVALID_CONFIGURATION);
+            bail!("Invalid WebP configuration");
         }
         WebPMemoryWriterInit(ww.as_mut_ptr());
         WebPPictureImportRGBA(
@@ -52,7 +52,7 @@ pub fn optimize(config: &Config) -> std::result::Result<(), libwebp_sys::WebPEnc
         WebPPictureRescale(&mut picture, target_width, target_height);
         let encode_result = WebPEncode(&webp_config, &mut picture);
         if encode_result == VP8StatusCode::VP8_STATUS_OK as i32 {
-            return Err(picture.error_code);
+            bail!("Error encoding WebP: {:?}", picture.error_code);
         }
         let ww = ww.assume_init();
         let contents = std::slice::from_raw_parts(ww.mem, ww.size);
@@ -100,7 +100,7 @@ pub fn optimize_gif(config: &GifConfig) -> std::result::Result<(), std::io::Erro
 mod tests {
 
     #[test]
-    fn webp_optimize_png_to_webp() -> Result<(), libwebp_sys::WebPEncodingError> {
+    fn webp_optimize_png_to_webp() {
         use super::*;
 
         optimize(&Config {
@@ -109,10 +109,11 @@ mod tests {
             width: Some(100),
             height: Some(100),
         })
+        .unwrap();
     }
 
     #[test]
-    fn webp_optimize_gif_to_webp_static() -> Result<(), libwebp_sys::WebPEncodingError> {
+    fn webp_optimize_gif_to_webp_static() {
         use super::*;
 
         optimize(&Config {
@@ -121,6 +122,7 @@ mod tests {
             width: Some(100),
             height: Some(100),
         })
+        .unwrap();
     }
 
     #[test]

@@ -7,7 +7,7 @@ pub struct Config<'a> {
     pub height: Option<i32>,
 }
 
-pub fn convert(config: &Config) -> std::result::Result<(), libwebp_sys::WebPEncodingError> {
+pub fn convert(config: &Config) -> anyhow::Result<()> {
     webp::optimize(&webp::Config {
         input_path: config.input_path,
         output_path: config.output_path,

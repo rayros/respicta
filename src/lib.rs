@@ -118,4 +118,18 @@ mod tests {
         })
         .unwrap();
     }
+
+    #[test]
+    #[should_panic = "Error converting jpg to webp"]
+    fn convert_panic_jpg_to_webp() {
+        use super::*;
+
+        convert(&Config {
+            input_path: "tests/files/not_existing.jpg",
+            output_path: "target/test1.webp",
+            width: Some(100),
+            height: None,
+        })
+        .unwrap();
+    }
 }

@@ -7,7 +7,7 @@ pub struct Config<'a> {
     pub height: Option<i32>,
 }
 
-pub fn convert(config: &Config) -> std::result::Result<(), libwebp_sys::WebPEncodingError> {
+pub fn convert(config: &Config) -> anyhow::Result<()> {
     webp::optimize(&webp::Config {
         input_path: config.input_path,
         output_path: config.output_path,
@@ -19,7 +19,7 @@ pub fn convert(config: &Config) -> std::result::Result<(), libwebp_sys::WebPEnco
 #[cfg(test)]
 mod tests {
     #[test]
-    fn webp2webp() -> std::result::Result<(), libwebp_sys::WebPEncodingError> {
+    fn webp2webp() {
         use super::*;
 
         convert(&Config {
@@ -28,5 +28,6 @@ mod tests {
             width: Some(100),
             height: None,
         })
+        .unwrap();
     }
 }
