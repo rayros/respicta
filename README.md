@@ -14,6 +14,10 @@ Image Resizer is a versatile project offering a library, command-line interface 
 
 ## Convert
 
+```bash
+image-resizer convert --help
+```
+
 ```plaintext
 Convert images from one format to another
 
