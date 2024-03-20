@@ -132,4 +132,46 @@ mod tests {
         })
         .unwrap();
     }
+
+    #[test]
+    #[should_panic = "Error converting jpg to jpg"]
+    fn convert_panic_jpg_to_jpg() {
+        use super::*;
+
+        convert(&Config {
+            input_path: "tests/files/not_existing.jpg",
+            output_path: "target/test1.jpg",
+            width: Some(100),
+            height: None,
+        })
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic = "Error converting png to png"]
+    fn convert_panic_png_to_png() {
+        use super::*;
+
+        convert(&Config {
+            input_path: "tests/files/not_existing.png",
+            output_path: "target/test1.png",
+            width: Some(100),
+            height: None,
+        })
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic = "Error converting webp to webp"]
+    fn convert_panic_webp_to_webp() {
+        use super::*;
+
+        convert(&Config {
+            input_path: "tests/files/not_existing.webp",
+            output_path: "target/test1.webp",
+            width: Some(100),
+            height: None,
+        })
+        .unwrap();
+    }
 }
