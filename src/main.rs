@@ -22,8 +22,6 @@ Examples:
     )]
     /// Convert images from one format to another
     Convert {
-        #[clap(long, action = clap::ArgAction::HelpLong)]
-        help: Option<bool>,
         /// Input image path
         input_path: PathBuf,
         /// Output image path
@@ -36,6 +34,8 @@ Examples:
         /// If not set, the height will be the same as the input image
         #[clap(short, long)]
         height: Option<u32>,
+        #[clap(long, action = clap::ArgAction::HelpLong)]
+        help: Option<bool>,
     },
     /// Server for the image resizer
     Server,
