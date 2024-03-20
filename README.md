@@ -12,3 +12,24 @@ Image Resizer is a versatile project offering a library, command-line interface 
 
 **Web Service**: Host a web service to resize images on-the-fly.
 
+## Convert
+
+```plaintext
+Convert images from one format to another
+
+Usage: image-resizer convert [OPTIONS] <INPUT_PATH> <OUTPUT_PATH>
+
+Arguments:
+  <INPUT_PATH>   Input image path
+  <OUTPUT_PATH>  Output image path
+
+Options:
+      --help             
+  -w, --width <WIDTH>    Width of the output image If not set, the width will be the same as the input image
+  -h, --height <HEIGHT>  Height of the output image If not set, the height will be the same as the input image
+
+
+Examples:
+
+  image-resizer convert --width 100 --height 100 input.jpg output.jpg
+```
