@@ -9,8 +9,8 @@ static START: Once = Once::new();
 pub struct Config<'a> {
     pub input_path: &'a str,
     pub output_path: &'a str,
-    pub width: Option<i32>,
-    pub height: Option<i32>,
+    pub width: Option<u32>,
+    pub height: Option<u32>,
 }
 
 pub fn optimize(config: &Config) -> Result<(), magick_rust::MagickError> {

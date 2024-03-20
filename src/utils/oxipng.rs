@@ -6,17 +6,11 @@ pub struct Config<'a> {
 }
 
 pub fn optimize(config: &Config) -> Result<(), oxipng::PngError> {
-    println!(
-        "OXIPNG: Optimizing PNG file: {} -> {}",
-        config.input_path, config.output_path
-    );
-    // Set up the optimization options
     let options = Options {
         strip: oxipng::StripChunks::Safe, // Optionally, strip metadata
         ..Options::default()
     };
 
-    // Perform PNG optimization
     oxipng::optimize(
         &config.input_path.into(),
         &OutFile::from_path(config.output_path.into()),

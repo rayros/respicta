@@ -8,16 +8,11 @@ use libwebp_sys::{
 pub struct Config<'a> {
     pub input_path: &'a str,
     pub output_path: &'a str,
-    pub width: Option<i32>,
-    pub height: Option<i32>,
+    pub width: Option<u32>,
+    pub height: Option<u32>,
 }
 
 pub fn optimize(config: &Config) -> anyhow::Result<()> {
-    println!(
-        "WEBP: Optimizing image file: {} -> {}",
-        config.input_path, config.output_path
-    );
-
     let input_image = image::open(config.input_path)?;
 
     let dimensions = input_image.dimensions();
@@ -49,7 +44,7 @@ pub fn optimize(config: &Config) -> anyhow::Result<()> {
         );
         let target_width = config.width.unwrap_or(0);
         let target_height = config.height.unwrap_or(0);
-        WebPPictureRescale(&mut picture, target_width, target_height);
+        WebPPictureRescale(&mut picture, target_width as i32, target_height as i32);
         let encode_result = WebPEncode(&webp_config, &mut picture);
         if encode_result == VP8StatusCode::VP8_STATUS_OK as i32 {
             bail!("Error encoding WebP: {:?}", picture.error_code);
@@ -70,10 +65,6 @@ pub struct GifConfig<'a> {
 }
 
 pub fn optimize_gif(config: &GifConfig) -> std::result::Result<(), std::io::Error> {
-    println!(
-        "WEBP: Optimizing gif file: {} -> {}",
-        config.input_path, config.output_path
-    );
     let input_path = config.input_path;
     let output_path = config.output_path;
     let command = format!("gif2webp -o {output_path} -q 75 -m 6 -mt -v {input_path}",);

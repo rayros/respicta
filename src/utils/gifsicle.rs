@@ -2,8 +2,8 @@ use std::str::FromStr;
 pub struct Config<'a> {
     pub input_path: &'a str,
     pub output_path: &'a str,
-    pub width: Option<i32>,
-    pub height: Option<i32>,
+    pub width: Option<u32>,
+    pub height: Option<u32>,
 }
 
 impl Config<'_> {

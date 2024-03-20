@@ -1,25 +1,28 @@
 pub mod core;
 pub mod utils;
 
+use std::path::PathBuf;
+
 use crate::core::{gif2gif, gif2webp, jpeg2jpeg, jpeg2webp, png2png, png2webp, webp2webp};
 
-pub struct Config<'a> {
-    pub input_path: &'a str,
-    pub output_path: &'a str,
-    pub width: Option<i32>,
-    pub height: Option<i32>,
+pub struct Config {
+    pub input_path: PathBuf,
+    pub output_path: PathBuf,
+    pub width: Option<u32>,
+    pub height: Option<u32>,
 }
 
-fn resolve_extension(path: &str) -> &str {
+fn resolve_extension(path: &PathBuf) -> &str {
+    let path = path.to_str().unwrap();
     let extension = path.split('.').last().unwrap();
     extension
 }
 
 pub fn convert(config: &Config) -> anyhow::Result<()> {
-    let input_extension = resolve_extension(config.input_path);
-    let output_extension = resolve_extension(config.output_path);
-    let input_path = config.input_path;
-    let output_path = config.output_path;
+    let input_extension = resolve_extension(&config.input_path);
+    let output_extension = resolve_extension(&config.output_path);
+    let input_path = config.input_path.to_str().unwrap();
+    let output_path = config.output_path.to_str().unwrap();
     let width = config.width;
     let height = config.height;
     match (input_extension, output_extension) {
@@ -89,15 +92,15 @@ mod tests {
         use super::*;
 
         convert(&Config {
-            input_path: "tests/files/orientation_test.jpg",
-            output_path: "target/test1.webp",
+            input_path: "tests/files/orientation_test.jpg".into(),
+            output_path: "target/test1.webp".into(),
             width: Some(100),
             height: None,
         })?;
 
         convert(&Config {
-            input_path: "tests/files/orientation_test.jpeg",
-            output_path: "target/test1.webp",
+            input_path: "tests/files/orientation_test.jpeg".into(),
+            output_path: "target/test1.webp".into(),
             width: Some(100),
             height: None,
         })?;
@@ -111,8 +114,8 @@ mod tests {
         use super::*;
 
         convert(&Config {
-            input_path: "tests/files/not_existing.jpg",
-            output_path: "target/test1.tiff",
+            input_path: "tests/files/not_existing.jpg".into(),
+            output_path: "target/test1.tiff".into(),
             width: Some(100),
             height: None,
         })
@@ -125,8 +128,8 @@ mod tests {
         use super::*;
 
         convert(&Config {
-            input_path: "tests/files/not_existing.jpg",
-            output_path: "target/test1.webp",
+            input_path: "tests/files/not_existing.jpg".into(),
+            output_path: "target/test1.webp".into(),
             width: Some(100),
             height: None,
         })
@@ -139,8 +142,8 @@ mod tests {
         use super::*;
 
         convert(&Config {
-            input_path: "tests/files/not_existing.jpg",
-            output_path: "target/test1.jpg",
+            input_path: "tests/files/not_existing.jpg".into(),
+            output_path: "target/test1.jpg".into(),
             width: Some(100),
             height: None,
         })
@@ -153,8 +156,8 @@ mod tests {
         use super::*;
 
         convert(&Config {
-            input_path: "tests/files/not_existing.png",
-            output_path: "target/test1.png",
+            input_path: "tests/files/not_existing.png".into(),
+            output_path: "target/test1.png".into(),
             width: Some(100),
             height: None,
         })
@@ -167,8 +170,8 @@ mod tests {
         use super::*;
 
         convert(&Config {
-            input_path: "tests/files/not_existing.webp",
-            output_path: "target/test1.webp",
+            input_path: "tests/files/not_existing.webp".into(),
+            output_path: "target/test1.webp".into(),
             width: Some(100),
             height: None,
         })
