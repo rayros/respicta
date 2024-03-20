@@ -41,6 +41,7 @@ Examples:
     Server,
 }
 
+#[cfg(not(tarpaulin_include))]
 fn main() {
     let cli = Cli::parse();
 
