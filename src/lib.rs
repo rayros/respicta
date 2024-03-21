@@ -1,9 +1,10 @@
 pub mod core;
+pub mod extensions;
 pub mod utils;
-
+use core::{gif2gif, gif2webp, jpeg2jpeg, jpeg2webp, png2png, png2webp, webp2webp};
 use std::path::PathBuf;
 
-use crate::core::{gif2gif, gif2webp, jpeg2jpeg, jpeg2webp, png2png, png2webp, webp2webp};
+use extensions::{GIF, JFIF, JPEG, JPG, PNG, WEBP};
 
 pub struct Config {
     pub input_path: PathBuf,
@@ -12,76 +13,74 @@ pub struct Config {
     pub height: Option<u32>,
 }
 
-fn resolve_extension(path: &PathBuf) -> &str {
-    let path = path.to_str().unwrap();
-    let extension = path.split('.').last().unwrap();
-    extension
-}
-
 pub fn convert(config: &Config) -> anyhow::Result<()> {
-    let input_extension = resolve_extension(&config.input_path);
-    let output_extension = resolve_extension(&config.output_path);
-    let input_path = config.input_path.to_str().unwrap();
-    let output_path = config.output_path.to_str().unwrap();
+    let input_path = &config.input_path;
+    let output_path = &config.output_path;
     let width = config.width;
     let height = config.height;
-    match (input_extension, output_extension) {
-        ("gif", "gif") => gif2gif::convert(&gif2gif::Config {
-            input_path,
-            output_path,
-            width,
-            height,
-        })
-        .map_err(|e| anyhow::anyhow!("Error converting gif to gif: {:?}", e)),
-        ("gif", "webp") => gif2webp::convert(&gif2webp::Config {
-            input_path,
-            output_path,
-            width,
-            height,
-        })
-        .map_err(|e| anyhow::anyhow!("Error converting gif to webp: {:?}", e)),
-        ("png", "webp") => png2webp::convert(&png2webp::Config {
-            input_path,
-            output_path,
-            width,
-            height,
-        })
-        .map_err(|e| anyhow::anyhow!("Error converting png to webp: {:?}", e)),
-        ("webp", "webp") => webp2webp::convert(&webp2webp::Config {
-            input_path,
-            output_path,
-            width,
-            height,
-        })
-        .map_err(|e| anyhow::anyhow!("Error converting webp to webp: {:?}", e)),
-        ("jpg" | "jpeg" | "jfif", "webp") => jpeg2webp::convert(&jpeg2webp::Config {
-            input_path,
-            output_path,
-            width,
-            height,
-        })
-        .map_err(|e| anyhow::anyhow!("Error converting jpg to webp: {:?}", e)),
-        ("jpg" | "jpeg" | "jfif", "jpg" | "jpeg" | "jfif") => {
-            jpeg2jpeg::convert(&jpeg2jpeg::Config {
-                input_path,
-                output_path,
-                width,
-                height,
-            })
-            .map_err(|e| anyhow::anyhow!("Error converting jpg to jpg: {:?}", e))
+
+    match (
+        input_path.extension().and_then(std::ffi::OsStr::to_str),
+        output_path.extension().and_then(std::ffi::OsStr::to_str),
+    ) {
+        (Some(input_extension), Some(output_extension)) => {
+            match (input_extension, output_extension) {
+                (GIF, GIF) => gif2gif::convert(&gif2gif::Config {
+                    input_path,
+                    output_path,
+                    width,
+                    height,
+                })
+                .map_err(|e| anyhow::anyhow!("Error converting gif to gif: {:?}", e)),
+                (GIF, WEBP) => gif2webp::convert(&gif2webp::Config {
+                    input_path,
+                    output_path,
+                    width,
+                    height,
+                })
+                .map_err(|e| anyhow::anyhow!("Error converting gif to webp: {:?}", e)),
+                (PNG, WEBP) => png2webp::convert(&png2webp::Config {
+                    input_path,
+                    output_path,
+                    width,
+                    height,
+                })
+                .map_err(|e| anyhow::anyhow!("Error converting png to webp: {:?}", e)),
+                (WEBP, WEBP) => webp2webp::convert(&webp2webp::Config {
+                    input_path,
+                    output_path,
+                    width,
+                    height,
+                })
+                .map_err(|e| anyhow::anyhow!("Error converting webp to webp: {:?}", e)),
+                (JPG | JPEG | JFIF, WEBP) => jpeg2webp::convert(&jpeg2webp::Config {
+                    input_path,
+                    output_path,
+                    width,
+                    height,
+                })
+                .map_err(|e| anyhow::anyhow!("Error converting jpg to webp: {:?}", e)),
+                (JPG | JPEG | JFIF, JPG | JPEG | JFIF) => jpeg2jpeg::convert(&jpeg2jpeg::Config {
+                    input_path,
+                    output_path,
+                    width,
+                    height,
+                })
+                .map_err(|e| anyhow::anyhow!("Error converting jpg to jpg: {:?}", e)),
+                (PNG, PNG) => png2png::convert(&png2png::Config {
+                    input_path,
+                    output_path,
+                    width,
+                    height,
+                })
+                .map_err(|e| anyhow::anyhow!("Error converting png to png: {:?}", e)),
+                (input_extension, output_extension) => {
+                    anyhow::bail!("Unsupported conversion: {input_extension} -> {output_extension}",)
+                }
+            }
         }
-        ("png", "png") => png2png::convert(&png2png::Config {
-            input_path,
-            output_path,
-            width,
-            height,
-        })
-        .map_err(|e| anyhow::anyhow!("Error converting png to png: {:?}", e)),
-        _ => anyhow::bail!(
-            "Unsupported conversion: {} -> {}",
-            input_extension,
-            output_extension
-        ),
+        (None, _) => anyhow::bail!("Input file has no extension"),
+        (_, None) => anyhow::bail!("Output file has no extension"),
     }
 }
 

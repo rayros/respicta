@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use anyhow::bail;
 use image::GenericImageView;
 use libwebp_sys::{
@@ -6,8 +8,8 @@ use libwebp_sys::{
 };
 
 pub struct Config<'a> {
-    pub input_path: &'a str,
-    pub output_path: &'a str,
+    pub input_path: &'a PathBuf,
+    pub output_path: &'a PathBuf,
     pub width: Option<u32>,
     pub height: Option<u32>,
 }
@@ -60,13 +62,13 @@ pub fn optimize(config: &Config) -> anyhow::Result<()> {
 }
 
 pub struct GifConfig<'a> {
-    pub input_path: &'a str,
-    pub output_path: &'a str,
+    pub input_path: &'a PathBuf,
+    pub output_path: &'a PathBuf,
 }
 
 pub fn optimize_gif(config: &GifConfig) -> std::result::Result<(), std::io::Error> {
-    let input_path = config.input_path;
-    let output_path = config.output_path;
+    let input_path = config.input_path.display();
+    let output_path = config.output_path.display();
     let command = format!("gif2webp -o {output_path} -q 75 -m 6 -mt -v {input_path}",);
     let output = std::process::Command::new("sh")
         .arg("-c")
@@ -95,8 +97,8 @@ mod tests {
         use super::*;
 
         optimize(&Config {
-            input_path: "tests/files/issue-159.png",
-            output_path: "target/issue-159.webp",
+            input_path: &PathBuf::from("tests/files/issue-159.png"),
+            output_path: &PathBuf::from("target/issue-159.webp"),
             width: Some(100),
             height: Some(100),
         })
@@ -108,8 +110,8 @@ mod tests {
         use super::*;
 
         optimize(&Config {
-            input_path: "tests/files/test1.gif",
-            output_path: "target/gif_test1_static.webp",
+            input_path: &PathBuf::from("tests/files/test1.gif"),
+            output_path: &PathBuf::from("target/gif_test1_static.webp"),
             width: Some(100),
             height: Some(100),
         })
@@ -121,8 +123,8 @@ mod tests {
         use super::*;
 
         optimize_gif(&GifConfig {
-            input_path: "tests/files/test1.gif",
-            output_path: "target/webp_gif_test1.webp",
+            input_path: &PathBuf::from("tests/files/test1.gif"),
+            output_path: &PathBuf::from("target/webp_gif_test1.webp"),
         })
         .unwrap();
     }
@@ -133,8 +135,8 @@ mod tests {
         use super::*;
 
         optimize_gif(&GifConfig {
-            input_path: "tests/files/not_existing.gif",
-            output_path: "target/webp_gif_test1.webp",
+            input_path: &PathBuf::from("tests/files/not_existing.gif"),
+            output_path: &PathBuf::from("target/webp_gif_test1.webp"),
         })
         .unwrap();
     }

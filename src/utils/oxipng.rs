@@ -1,8 +1,10 @@
+use std::path::PathBuf;
+
 use oxipng::{Options, OutFile};
 
 pub struct Config<'a> {
-    pub input_path: &'a str,
-    pub output_path: &'a str,
+    pub input_path: &'a PathBuf,
+    pub output_path: &'a PathBuf,
 }
 
 pub fn optimize(config: &Config) -> Result<(), oxipng::PngError> {
@@ -25,8 +27,8 @@ mod tests {
         use super::*;
 
         optimize(&Config {
-            input_path: "tests/files/issue-159.png",
-            output_path: "target/issue-159.png",
+            input_path: &PathBuf::from("tests/files/issue-159.png"),
+            output_path: &PathBuf::from("target/issue-159.png"),
         })
         .unwrap();
     }

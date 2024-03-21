@@ -1,8 +1,9 @@
 use crate::utils::gifsicle;
+use std::path::PathBuf;
 
 pub struct Config<'a> {
-    pub input_path: &'a str,
-    pub output_path: &'a str,
+    pub input_path: &'a PathBuf,
+    pub output_path: &'a PathBuf,
     pub width: Option<u32>,
     pub height: Option<u32>,
 }
@@ -23,8 +24,8 @@ mod tests {
         use super::*;
 
         convert(&Config {
-            input_path: "tests/files/gif2gif_test1.gif",
-            output_path: "target/gif2gif_test1.gif",
+            input_path: &PathBuf::from("tests/files/gif2gif_test1.gif"),
+            output_path: &PathBuf::from("target/gif2gif_test1.gif"),
             width: Some(100),
             height: None,
         })
@@ -37,8 +38,8 @@ mod tests {
         use super::*;
 
         convert(&Config {
-            input_path: "tests/files/gif2gif_notexisting_test1.gif",
-            output_path: "target/gif2gif_test1.gif",
+            input_path: &PathBuf::from("tests/files/gif2gif_notexisting_test1.gif"),
+            output_path: &PathBuf::from("target/gif2gif_test1.gif"),
             width: Some(100),
             height: None,
         })

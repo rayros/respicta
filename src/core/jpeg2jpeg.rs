@@ -1,8 +1,10 @@
+use std::path::PathBuf;
+
 use crate::utils::magick;
 
 pub struct Config<'a> {
-    pub input_path: &'a str,
-    pub output_path: &'a str,
+    pub input_path: &'a PathBuf,
+    pub output_path: &'a PathBuf,
     pub width: Option<u32>,
     pub height: Option<u32>,
 }
@@ -23,8 +25,8 @@ mod tests {
         use super::*;
 
         convert(&Config {
-            input_path: "tests/files/jpeg2jpeg_test1.jpg",
-            output_path: "target/jpeg2jpeg_test1.jfif",
+            input_path: &PathBuf::from("tests/files/jpeg2jpeg_test1.jpg"),
+            output_path: &PathBuf::from("target/jpeg2jpeg_test1.jfif"),
             width: Some(100),
             height: None,
         })
@@ -37,8 +39,8 @@ mod tests {
         use super::*;
 
         convert(&Config {
-            input_path: "tests/files/jpeg2jpeg_notexisting_test1.jpg",
-            output_path: "target/jpeg2jpeg_test1.jfif",
+            input_path: &PathBuf::from("tests/files/jpeg2jpeg_notexisting_test1.jpg"),
+            output_path: &PathBuf::from("target/jpeg2jpeg_test1.jfif"),
             width: Some(100),
             height: None,
         })

@@ -1,49 +1,30 @@
-use std::str::FromStr;
+use std::path::PathBuf;
+
 pub struct Config<'a> {
-    pub input_path: &'a str,
-    pub output_path: &'a str,
+    pub input_path: &'a PathBuf,
+    pub output_path: &'a PathBuf,
     pub width: Option<u32>,
     pub height: Option<u32>,
 }
 
 impl Config<'_> {
-    pub fn to_args(&self) -> Vec<String> {
-        println!("To args: {:?}", self.width);
-        let input = vec![self.input_path];
-        let optional_width = if let Some(width) = self.width {
-            vec!["--resize-width".to_string(), width.to_string()]
-        } else {
-            vec![]
-        };
-        let optional_height = if let Some(height) = self.height {
-            vec!["--resize-height".to_string(), height.to_string()]
-        } else {
-            vec![]
-        };
-        let optional_width_vec_str: Vec<&str> = optional_width
-            .iter()
-            .map(std::string::String::as_str)
-            .collect();
-        let optional_height_vec_str: Vec<&str> = optional_height
-            .iter()
-            .map(std::string::String::as_str)
-            .collect();
-        let args: Vec<_> = [
-            vec!["", "-O3", "--output", self.output_path],
-            optional_width_vec_str,
-            optional_height_vec_str,
-            input,
-        ]
-        .concat()
-        .into_iter()
-        .map(|arg| String::from_str(arg).unwrap())
-        .collect();
-        args
+    pub fn to_args(&self) -> String {
+        let output_path = self.output_path.display();
+        let input_path = self.input_path.display();
+        let mut result = format!("-O3 --output {output_path}");
+        if let Some(width) = self.width {
+            result = format!("{result} --resize-width {width}");
+        }
+        if let Some(height) = self.height {
+            result = format!("{result} --resize-height {height}");
+        }
+        result = format!("{result} {input_path}");
+        result
     }
 }
 
 pub fn optimize(config: Config) -> std::result::Result<(), std::io::Error> {
-    let args = config.to_args().join(" ");
+    let args = config.to_args();
     let command = format!("gifsicle {args}");
     let output = std::process::Command::new("sh")
         .arg("-c")
@@ -67,13 +48,14 @@ pub fn optimize(config: Config) -> std::result::Result<(), std::io::Error> {
 
 #[cfg(test)]
 mod tests {
+
     #[test]
     fn gifsicle() {
         use super::*;
 
         optimize(Config {
-            input_path: "tests/files/gifsicle_test1.gif",
-            output_path: "target/gifsicle_test1.gif",
+            input_path: &PathBuf::from("tests/files/gifsicle_test1.gif"),
+            output_path: &PathBuf::from("target/gifsicle_test1.gif"),
             width: Some(100),
             height: None,
         })
@@ -85,8 +67,8 @@ mod tests {
         use super::*;
 
         optimize(Config {
-            input_path: "tests/files/gifsicle_test1.gif",
-            output_path: "target/gifsicle_without_width_and_height_test2.gif",
+            input_path: &PathBuf::from("tests/files/gifsicle_test1.gif"),
+            output_path: &PathBuf::from("target/gifsicle_without_width_and_height_test2.gif"),
             width: None,
             height: None,
         })

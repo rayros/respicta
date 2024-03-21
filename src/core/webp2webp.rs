@@ -1,8 +1,10 @@
+use std::path::PathBuf;
+
 use crate::utils::webp;
 
 pub struct Config<'a> {
-    pub input_path: &'a str,
-    pub output_path: &'a str,
+    pub input_path: &'a PathBuf,
+    pub output_path: &'a PathBuf,
     pub width: Option<u32>,
     pub height: Option<u32>,
 }
@@ -23,8 +25,8 @@ mod tests {
         use super::*;
 
         convert(&Config {
-            input_path: "tests/files/webp2webp_test1.webp",
-            output_path: "target/webp2webp_test1.webp",
+            input_path: &PathBuf::from("tests/files/webp2webp_test1.webp"),
+            output_path: &PathBuf::from("target/webp2webp_test1.webp"),
             width: Some(100),
             height: None,
         })
