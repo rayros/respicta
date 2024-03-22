@@ -1,6 +1,6 @@
-use std::path::PathBuf;
-
 use clap::{Parser, Subcommand};
+use image_resizer::{convert, server};
+use std::path::PathBuf;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None, arg_required_else_help = true)]
@@ -42,7 +42,11 @@ Examples:
 }
 
 #[cfg(not(tarpaulin_include))]
-fn main() {
+#[tokio::main]
+
+async fn main() {
+    use image_resizer::Config;
+
     let cli = Cli::parse();
 
     match cli.command {
@@ -53,17 +57,16 @@ fn main() {
             height,
             ..
         }) => {
-            let config = image_resizer::Config {
+            convert(&Config {
                 input_path,
                 output_path,
                 width,
                 height,
-            };
-
-            image_resizer::convert(&config).unwrap();
+            })
+            .unwrap();
         }
-        Some(Commands::Server) => todo!(),
-        None => {}
+        Some(Commands::Server) => server::run().await.unwrap(),
+        None => unreachable!(),
     }
 }
 

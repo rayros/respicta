@@ -1,10 +1,11 @@
 pub mod core;
 pub mod extensions;
+pub mod server;
 pub mod utils;
-use core::{gif2gif, gif2webp, jpeg2jpeg, jpeg2webp, png2png, png2webp, webp2webp};
-use std::path::PathBuf;
 
+use core::{gif2gif, gif2webp, jpeg2jpeg, jpeg2webp, png2png, png2webp, webp2webp};
 use extensions::{GIF, JFIF, JPEG, JPG, PNG, WEBP};
+use std::path::PathBuf;
 
 pub struct Config {
     pub input_path: PathBuf,
