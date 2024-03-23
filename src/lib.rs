@@ -177,4 +177,74 @@ mod tests {
         })
         .unwrap();
     }
+
+    #[test]
+    #[should_panic = "Input file has no extension"]
+    fn convert_panic_no_input_extension() {
+        use super::*;
+
+        convert(&Config {
+            input_path: "tests/files/not_existing".into(),
+            output_path: "target/test1.webp".into(),
+            width: Some(100),
+            height: None,
+        })
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic = "Output file has no extension"]
+    fn convert_panic_no_output_extension() {
+        use super::*;
+
+        convert(&Config {
+            input_path: "tests/files/not_existing.jpg".into(),
+            output_path: "target/test1".into(),
+            width: Some(100),
+            height: None,
+        })
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic = "Error converting gif to gif"]
+    fn convert_panic_gif_to_gif() {
+        use super::*;
+
+        convert(&Config {
+            input_path: "tests/files/not_existing.gif".into(),
+            output_path: "target/test1.gif".into(),
+            width: Some(100),
+            height: None,
+        })
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic = "Error converting gif to webp"]
+    fn convert_panic_gif_to_webp() {
+        use super::*;
+
+        convert(&Config {
+            input_path: "tests/files/not_existing.gif".into(),
+            output_path: "target/test1.webp".into(),
+            width: Some(100),
+            height: None,
+        })
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic = "Error converting png to webp"]
+    fn convert_panic_png_to_webp() {
+        use super::*;
+
+        convert(&Config {
+            input_path: "tests/files/not_existing.png".into(),
+            output_path: "target/test1.webp".into(),
+            width: Some(100),
+            height: None,
+        })
+        .unwrap();
+    }
 }
