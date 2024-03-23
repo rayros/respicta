@@ -97,8 +97,8 @@ mod tests {
         use super::*;
 
         optimize(&Config {
-            input_path: &PathBuf::from("tests/files/issue-159.png"),
-            output_path: &PathBuf::from("target/issue-159.webp"),
+            input_path: &"tests/files/issue-159.png".into(),
+            output_path: &"target/issue-159.webp".into(),
             width: Some(100),
             height: Some(100),
         })
@@ -110,8 +110,8 @@ mod tests {
         use super::*;
 
         optimize(&Config {
-            input_path: &PathBuf::from("tests/files/test1.gif"),
-            output_path: &PathBuf::from("target/gif_test1_static.webp"),
+            input_path: &"tests/files/test1.gif".into(),
+            output_path: &"target/gif_test1_static.webp".into(),
             width: Some(100),
             height: Some(100),
         })
@@ -123,8 +123,8 @@ mod tests {
         use super::*;
 
         optimize_gif(&GifConfig {
-            input_path: &PathBuf::from("tests/files/test1.gif"),
-            output_path: &PathBuf::from("target/webp_gif_test1.webp"),
+            input_path: &"tests/files/test1.gif".into(),
+            output_path: &"target/webp_gif_test1.webp".into(),
         })
         .unwrap();
     }
@@ -135,8 +135,8 @@ mod tests {
         use super::*;
 
         optimize_gif(&GifConfig {
-            input_path: &PathBuf::from("tests/files/not_existing.gif"),
-            output_path: &PathBuf::from("target/webp_gif_test1.webp"),
+            input_path: &"tests/files/not_existing.gif".into(),
+            output_path: &"target/webp_gif_test1.webp".into(),
         })
         .unwrap();
     }
