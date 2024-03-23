@@ -1,4 +1,8 @@
-# image-resizer
+# Respicta - Image Resizer
+
+<p align="center" width="100%">
+    <img src="./images/logo_small.jpeg"> 
+</p>
 
 Image Resizer is a versatile project offering a library, command-line interface (CLI), and web service for resizing images and changing their formats seamlessly.
 
