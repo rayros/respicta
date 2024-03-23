@@ -38,7 +38,12 @@ Examples:
         help: Option<bool>,
     },
     /// Server for the image resizer
-    Server,
+    Server {
+        /// Address to bind the server to (default: 0.0.0.0:3000)
+        address: Option<String>,
+        /// Maximum file size in bytes (default: 10MB)
+        limit: Option<usize>,
+    },
 }
 
 #[cfg(not(tarpaulin_include))]
@@ -65,7 +70,7 @@ async fn main() {
             })
             .unwrap();
         }
-        Some(Commands::Server) => server::run().await.unwrap(),
+        Some(Commands::Server { address, limit }) => server::run(address, limit).await.unwrap(),
         None => unreachable!(),
     }
 }

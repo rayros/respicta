@@ -18,14 +18,16 @@ async fn accept_form(mut multipart: Multipart) {
     }
 }
 
-pub async fn run() -> std::io::Result<()> {
+pub async fn run(address: Option<String>, limit: Option<usize>) -> std::io::Result<()> {
+    let address = address.unwrap_or_else(|| "0.0.0.0:3000".to_string());
+    let limit = limit.unwrap_or(10 * 1024 * 1024);
     let app = Router::new()
         .route("/", post(accept_form))
-        .layer(DefaultBodyLimit::max(10 * 1024 * 1024));
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await;
+        .layer(DefaultBodyLimit::max(limit));
+    let listener = tokio::net::TcpListener::bind(address.clone()).await;
     match listener {
         Ok(listener) => {
-            println!("Server started at http://localhost:3000");
+            println!("Server started at http://{address}");
             axum::serve(listener, app).await
         }
         Err(error) => Err(error),
