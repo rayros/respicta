@@ -12,6 +12,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     #[clap(
+        arg_required_else_help = true,
         disable_help_flag = true,
         after_help = "
 Examples:
