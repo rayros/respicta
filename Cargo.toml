@@ -14,3 +14,6 @@ libwebp-sys = "0.9.5"
 magick_rust = "0.20.0"
 oxipng = "9.0.0"
 tokio = { version = "1.36.0", features = ["full"] }
+
+[dev-dependencies]
+axum-test = "14.4.0"

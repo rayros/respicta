@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
-use image_resizer::{convert, server};
+use image_resizer::{convert, server::app};
 use std::path::PathBuf;
+use tokio::net::TcpListener;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None, arg_required_else_help = true)]
@@ -47,6 +48,19 @@ Examples:
     },
 }
 
+async fn start_server(address: Option<String>, limit: Option<usize>) -> std::io::Result<()> {
+    let address = address.unwrap_or_else(|| "0.0.0.0:3000".to_string());
+    let app = app(limit);
+    let listener = TcpListener::bind(address.clone()).await;
+    match listener {
+        Ok(listener) => {
+            println!("Server started at http://{address}");
+            axum::serve(listener, app).await
+        }
+        Err(error) => Err(error),
+    }
+}
+
 #[tokio::main]
 async fn main() {
     use image_resizer::Config;
@@ -69,7 +83,7 @@ async fn main() {
             })
             .unwrap();
         }
-        Some(Commands::Server { address, limit }) => server::run(address, limit).await.unwrap(),
+        Some(Commands::Server { address, limit }) => start_server(address, limit).await.unwrap(),
         None => unreachable!(),
     }
 }
