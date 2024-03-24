@@ -1,32 +1,23 @@
-use std::path::PathBuf;
+use crate::{utils::webp, Dimensions, InputOutput};
 
-use crate::utils::webp;
-
-pub struct Config<'a> {
-    pub input_path: &'a PathBuf,
-    pub output_path: &'a PathBuf,
-    pub width: Option<u32>,
-    pub height: Option<u32>,
-}
-
-pub fn convert(config: &Config) -> anyhow::Result<()> {
-    webp::optimize(&webp::Config {
-        input_path: config.input_path,
-        output_path: config.output_path,
-        width: config.width,
-        height: config.height,
-    })
+pub fn convert<T>(config: &T) -> anyhow::Result<()>
+where
+    T: InputOutput + Dimensions,
+{
+    webp::optimize(config)
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::Config;
+
     #[test]
     fn jpeg2webp() {
         use super::*;
 
         convert(&Config {
-            input_path: &PathBuf::from("tests/files/jpeg2webp_test1.jpeg"),
-            output_path: &PathBuf::from("target/jpeg2webp_test1.webp"),
+            input_path: &"tests/files/jpeg2webp_test1.jpeg".into(),
+            output_path: &"target/jpeg2webp_test1.webp".into(),
             width: Some(100),
             height: None,
         })

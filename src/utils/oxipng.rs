@@ -2,22 +2,35 @@ use std::path::PathBuf;
 
 use oxipng::{Options, OutFile};
 
+use crate::InputOutput;
+
 pub struct Config<'a> {
     pub input_path: &'a PathBuf,
     pub output_path: &'a PathBuf,
 }
 
-pub fn optimize(config: &Config) -> Result<(), oxipng::PngError> {
-    let options = Options {
+impl InputOutput for Config<'_> {
+    fn input_path(&self) -> &PathBuf {
+        self.input_path
+    }
+
+    fn output_path(&self) -> &PathBuf {
+        self.output_path
+    }
+}
+
+pub fn optimize<T>(config: &T) -> Result<(), oxipng::PngError>
+where
+    T: InputOutput,
+{
+    let input = &config.input_path().into();
+    let output = &OutFile::from_path(config.output_path().clone());
+    let options = &Options {
         strip: oxipng::StripChunks::Safe, // Optionally, strip metadata
         ..Options::default()
     };
 
-    oxipng::optimize(
-        &config.input_path.into(),
-        &OutFile::from_path(config.output_path.into()),
-        &options,
-    )
+    oxipng::optimize(input, output, options)
 }
 
 #[cfg(test)]
@@ -27,8 +40,8 @@ mod tests {
         use super::*;
 
         optimize(&Config {
-            input_path: &PathBuf::from("tests/files/issue-159.png"),
-            output_path: &PathBuf::from("target/issue-159.png"),
+            input_path: &"tests/files/issue-159.png".into(),
+            output_path: &"target/issue-159.png".into(),
         })
         .unwrap();
     }

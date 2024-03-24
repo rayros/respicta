@@ -1,31 +1,23 @@
-use crate::utils::gifsicle;
-use std::path::PathBuf;
+use crate::{utils::gifsicle, Dimensions, InputOutput};
 
-pub struct Config<'a> {
-    pub input_path: &'a PathBuf,
-    pub output_path: &'a PathBuf,
-    pub width: Option<u32>,
-    pub height: Option<u32>,
-}
-
-pub fn convert(config: &Config) -> std::result::Result<(), std::io::Error> {
-    gifsicle::optimize(gifsicle::Config {
-        input_path: config.input_path,
-        output_path: config.output_path,
-        width: config.width,
-        height: config.height,
-    })
+pub fn convert<T>(config: &T) -> std::result::Result<(), std::io::Error>
+where
+    T: InputOutput + Dimensions,
+{
+    gifsicle::optimize(config)
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::Config;
+
     #[test]
     fn gif2gif() {
         use super::*;
 
         convert(&Config {
-            input_path: &PathBuf::from("tests/files/gif2gif_test1.gif"),
-            output_path: &PathBuf::from("target/gif2gif_test1.gif"),
+            input_path: &"tests/files/gif2gif_test1.gif".into(),
+            output_path: &"target/gif2gif_test1.gif".into(),
             width: Some(100),
             height: None,
         })
@@ -33,13 +25,13 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic = "Custom { kind: Other, error: \"gifsicle failed\" }"]
     fn gif2gif_panic() {
         use super::*;
 
         convert(&Config {
-            input_path: &PathBuf::from("tests/files/gif2gif_notexisting_test1.gif"),
-            output_path: &PathBuf::from("target/gif2gif_test1.gif"),
+            input_path: &"tests/files/gif2gif_notexisting_test1.gif".into(),
+            output_path: &"target/gif2gif_test1.gif".into(),
             width: Some(100),
             height: None,
         })

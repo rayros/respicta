@@ -7,15 +7,13 @@ use libwebp_sys::{
     WebPPicture, WebPPictureFree, WebPPictureImportRGBA, WebPPictureRescale, WebPValidateConfig,
 };
 
-pub struct Config<'a> {
-    pub input_path: &'a PathBuf,
-    pub output_path: &'a PathBuf,
-    pub width: Option<u32>,
-    pub height: Option<u32>,
-}
+use crate::{Dimensions, InputOutput};
 
-pub fn optimize(config: &Config) -> anyhow::Result<()> {
-    let input_image = image::open(config.input_path)?;
+pub fn optimize<T>(config: &T) -> anyhow::Result<()>
+where
+    T: InputOutput + Dimensions,
+{
+    let input_image = image::open(config.input_path())?;
 
     let dimensions = input_image.dimensions();
     let rgba_image = input_image.into_rgba8();
@@ -44,8 +42,8 @@ pub fn optimize(config: &Config) -> anyhow::Result<()> {
             rgba_image.as_ptr(),
             i32::try_from(dimensions.0).unwrap() * 4,
         );
-        let target_width = config.width.unwrap_or(0);
-        let target_height = config.height.unwrap_or(0);
+        let target_width = config.width().unwrap_or(0);
+        let target_height = config.height().unwrap_or(0);
         WebPPictureRescale(&mut picture, target_width as i32, target_height as i32);
         let encode_result = WebPEncode(&webp_config, &mut picture);
         if encode_result == VP8StatusCode::VP8_STATUS_OK as i32 {
@@ -53,7 +51,7 @@ pub fn optimize(config: &Config) -> anyhow::Result<()> {
         }
         let ww = ww.assume_init();
         let contents = std::slice::from_raw_parts(ww.mem, ww.size);
-        std::fs::write(config.output_path, contents).unwrap();
+        std::fs::write(config.output_path(), contents).unwrap();
 
         WebPPictureFree(&mut picture);
     }
@@ -64,6 +62,16 @@ pub fn optimize(config: &Config) -> anyhow::Result<()> {
 pub struct GifConfig<'a> {
     pub input_path: &'a PathBuf,
     pub output_path: &'a PathBuf,
+}
+
+fn process_exit_code(code: Option<i32>) -> std::result::Result<(), std::io::Error> {
+    match code {
+        Some(0) => Ok(()),
+        Some(_) | None => Err(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "gif2webp failed",
+        )),
+    }
 }
 
 pub fn optimize_gif(config: &GifConfig) -> std::result::Result<(), std::io::Error> {
@@ -80,17 +88,12 @@ pub fn optimize_gif(config: &GifConfig) -> std::result::Result<(), std::io::Erro
 
     let code = output.status.code();
 
-    match code {
-        Some(0) => Ok(()),
-        Some(_) | None => Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            "gif2webp failed",
-        )),
-    }
+    process_exit_code(code)
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::Config;
 
     #[test]
     fn webp_optimize_png_to_webp() {
@@ -130,7 +133,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "gif2webp failed"]
+    #[should_panic = "Custom { kind: Other, error: \"gif2webp failed\" }"]
     fn webp_optimize_gif_to_webp_panic() {
         use super::*;
 
@@ -139,5 +142,13 @@ mod tests {
             output_path: &"target/webp_gif_test1.webp".into(),
         })
         .unwrap();
+    }
+
+    #[test]
+    #[should_panic = "Custom { kind: Other, error: \"gif2webp failed\" }"]
+    fn process_exit_code_terminated_by_signal_panic() {
+        use super::*;
+
+        process_exit_code(None).unwrap();
     }
 }

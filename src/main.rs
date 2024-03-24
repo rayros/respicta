@@ -47,9 +47,7 @@ Examples:
     },
 }
 
-#[cfg(not(tarpaulin_include))]
 #[tokio::main]
-
 async fn main() {
     use image_resizer::Config;
 
@@ -64,8 +62,8 @@ async fn main() {
             ..
         }) => {
             convert(&Config {
-                input_path,
-                output_path,
+                input_path: &input_path,
+                output_path: &output_path,
                 width,
                 height,
             })
