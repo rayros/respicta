@@ -16,11 +16,7 @@ struct AppError(anyhow::Error);
 // Tell axum how to convert `AppError` into a response.
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            format!("Something went wrong: {}", self.0),
-        )
-            .into_response()
+        (StatusCode::INTERNAL_SERVER_ERROR, self.0.to_string()).into_response()
     }
 }
 
@@ -108,5 +104,44 @@ mod tests {
         let response = server.post("/").multipart(multipart_form).await;
 
         assert_eq!(response.status_code(), StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn test_convert_no_multipart() {
+        use super::*;
+        use axum_test::TestServer;
+
+        let app = Router::new().route("/", post(convert_method));
+        let server = TestServer::new(app).unwrap();
+
+        let response = server.post("/").await;
+
+        assert_eq!(response.status_code(), StatusCode::BAD_REQUEST);
+        assert_eq!(
+            response.text(),
+            "Invalid `boundary` for `multipart/form-data` request"
+        );
+    }
+
+    #[tokio::test]
+    async fn test_convert_unknown_extension() {
+        use super::*;
+        use axum_test::multipart::MultipartForm;
+        use axum_test::{multipart::Part, TestServer};
+
+        let app = Router::new().route("/", post(convert_method));
+        let server = TestServer::new(app).unwrap();
+        let image_bytes = include_bytes!("../tests/files/issue-159.png");
+        let image_part =
+            Part::bytes(image_bytes.as_slice()).file_name("issue-159.someunknownextension");
+
+        let multipart_form = MultipartForm::new().add_part("file", image_part);
+        let response = server.post("/").multipart(multipart_form).await;
+
+        assert_eq!(response.status_code(), StatusCode::INTERNAL_SERVER_ERROR);
+        assert_eq!(
+            response.text(),
+            "Unsupported conversion: someunknownextension -> webp"
+        );
     }
 }
