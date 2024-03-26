@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use image_resizer::{convert, server::app};
+use respicta::{convert, server::app};
 use std::path::PathBuf;
 use tokio::net::TcpListener;
 
@@ -63,7 +63,7 @@ async fn start_server(address: Option<String>, limit: Option<usize>) -> std::io:
 
 #[tokio::main]
 async fn main() {
-    use image_resizer::Config;
+    use respicta::Config;
 
     let cli = Cli::parse();
 

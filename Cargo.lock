@@ -911,22 +911,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "image-resizer"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "axum",
- "axum-test",
- "clap",
- "image",
- "libwebp-sys",
- "magick_rust",
- "oxipng",
- "tempfile",
- "tokio",
-]
-
-[[package]]
 name = "image-webp"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1652,6 +1636,22 @@ checksum = "9838134a2bfaa8e1f40738fcc972ac799de6e0e06b5157acb95fc2b05a0ea283"
 dependencies = [
  "lazy_static",
  "thiserror",
+]
+
+[[package]]
+name = "respicta"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "axum-test",
+ "clap",
+ "image",
+ "libwebp-sys",
+ "magick_rust",
+ "oxipng",
+ "tempfile",
+ "tokio",
 ]
 
 [[package]]
