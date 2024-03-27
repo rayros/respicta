@@ -36,3 +36,16 @@ COPY ./tests ./tests
 
 RUN cargo test
 
+FROM build as release
+
+RUN cargo build --release
+
+FROM debian:stable-slim
+
+RUN apt-get update \
+ && apt-get -y install libjpeg-turbo-progs libpng-dev gifsicle webp \
+ && rm -rfv /var/lib/apt/lists/*
+
+COPY --from=release /app/target/release/app /usr/local/bin/app
+
+CMD ["app"]
