@@ -6,7 +6,7 @@ repository = "https://github.com/rayros/image-resizer"
 readme = "README.md"
 license = "MIT"
 description = "Respicta is a versatile project offering a library, command-line interface (CLI), and web service for resizing images and changing their formats seamlessly."
-keywords = ["image", "resize", "convert", "webp", "png", "jpg", "jpeg", "jfif", "gif", "cli", "web-service"]
+keywords = ["image", "resize", "convert", "cli", "web-service"]
 exclude = [".github", ".vscode"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
