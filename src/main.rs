@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 use respicta::{convert, server::app};
 use std::path::PathBuf;
-use tokio::net::TcpListener;
+use tokio::{net::TcpListener, signal};
 
 #[derive(Parser)]
 #[command(version, about, long_about = None, arg_required_else_help = true)]
@@ -55,9 +55,35 @@ async fn start_server(address: Option<String>, limit: Option<usize>) -> std::io:
     match listener {
         Ok(listener) => {
             println!("Server started at http://{address}");
-            axum::serve(listener, app).await
+            axum::serve(listener, app)
+                .with_graceful_shutdown(shutdown_signal())
+                .await
         }
         Err(error) => Err(error),
+    }
+}
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        () = ctrl_c => {},
+        () = terminate => {},
     }
 }
 
