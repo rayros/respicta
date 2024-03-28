@@ -19,7 +19,7 @@ Respicta is a versatile project offering a library, command-line interface (CLI)
 ## Convert
 
 ```bash
-image-resizer convert --help
+docker run --rm -v ./:/images rayros/respicta convert --help
 ```
 
 ```plaintext
@@ -41,3 +41,10 @@ Examples:
 
   image-resizer convert --width 100 --height 100 input.jpg output.jpg
 ```
+
+
+---
+
+##### Program utilized in:
+
+- [mamrzeczy.pl - Free Classifieds in Poland](https://mamrzeczy.pl)
