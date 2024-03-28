@@ -3,7 +3,7 @@ FROM rust:slim-bookworm as build
 WORKDIR /
 
 RUN apt-get update \
- && apt-get -y install curl build-essential clang pkg-config libjpeg-turbo-progs libpng-dev gifsicle webp \
+ && apt-get -y install curl build-essential clang pkg-config libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp \
  && rm -rfv /var/lib/apt/lists/*
 
 ENV MAGICK_VERSION 7.1.1-29
@@ -43,7 +43,7 @@ RUN cargo build --release
 FROM debian:bookworm-slim
 
 RUN apt-get update \
- && apt-get -y install libjpeg-turbo-progs libpng-dev gifsicle webp \
+ && apt-get -y install libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp \
  && rm -rfv /var/lib/apt/lists/*
 
 COPY --from=release /usr/local/lib /usr/local/lib
@@ -53,5 +53,7 @@ COPY --from=release /app/target/release/respicta /usr/local/bin/respicta
 RUN apt-get update && apt-get install libgomp1
 
 ENV LD_LIBRARY_PATH=/usr/local/lib
+
+WORKDIR /images
 
 ENTRYPOINT ["/bin/bash", "-c", "respicta \"$@\"", "--"]
