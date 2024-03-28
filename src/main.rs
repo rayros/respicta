@@ -18,7 +18,7 @@ enum Commands {
         after_help = "
 Examples:
 
-  image-resizer convert --width 100 --height 100 input.jpg output.jpg
+  respicta convert --width 100 --height 100 input.jpg output.jpg
 
 "
     )]
