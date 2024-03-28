@@ -39,7 +39,7 @@ Examples:
         #[clap(long, action = clap::ArgAction::HelpLong)]
         help: Option<bool>,
     },
-    /// Server for the image resizer
+    /// Start a server to convert images
     Server {
         /// Address to bind the server to (default: 0.0.0.0:3000)
         address: Option<String>,
