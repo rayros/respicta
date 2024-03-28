@@ -1,4 +1,4 @@
-FROM rust:latest as build
+FROM rust:slim-bookworm as build
 
 WORKDIR /
 
@@ -40,12 +40,18 @@ FROM build as release
 
 RUN cargo build --release
 
-FROM debian:stable-slim
+FROM debian:bookworm-slim
 
 RUN apt-get update \
  && apt-get -y install libjpeg-turbo-progs libpng-dev gifsicle webp \
  && rm -rfv /var/lib/apt/lists/*
 
-COPY --from=release /app/target/release/app /usr/local/bin/app
+COPY --from=release /usr/local/lib /usr/local/lib
 
-CMD ["app"]
+COPY --from=release /app/target/release/respicta /usr/local/bin/respicta
+
+RUN apt-get update && apt-get install libgomp1
+
+ENV LD_LIBRARY_PATH=/usr/local/lib
+
+ENTRYPOINT ["/bin/bash", "-c", "respicta \"$@\"", "--"]
