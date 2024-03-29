@@ -42,6 +42,22 @@ Examples:
   image-resizer convert --width 100 --height 100 input.jpg output.jpg
 ```
 
+## Server
+
+```bash
+docker run --rm rayros/respicta server --help
+```
+
+```plaintext
+Start a server to convert images
+
+Usage: respicta server [OPTIONS]
+
+Options:
+  -a, --address <ADDRESS>  Address to bind the server to (default: 0.0.0.0:3000)
+  -l, --limit <LIMIT>      Maximum file size in bytes (default: 10MB)
+  -h, --help               Print help
+```
 
 ---
 
