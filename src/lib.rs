@@ -3,7 +3,7 @@ pub mod extensions;
 pub mod server;
 pub mod utils;
 
-use core::{gif2gif, gif2webp, jpeg2jpeg, jpeg2webp, png2png, png2webp, webp2webp};
+use core::{gif2gif, gif2webp, jpeg2jpeg, jpeg2webp, png2jpeg, png2png, png2webp, webp2webp};
 use extensions::{GIF, JFIF, JPEG, JPG, PNG, WEBP};
 use std::path::PathBuf;
 
@@ -71,6 +71,8 @@ pub fn convert(config: &Config) -> anyhow::Result<()> {
                     .map_err(|e| anyhow::anyhow!("Error converting jpg to jpg: {:?}", e)),
                 (PNG, PNG) => png2png::convert(config)
                     .map_err(|e| anyhow::anyhow!("Error converting png to png: {:?}", e)),
+                (PNG, JPG | JPEG | JFIF) => png2jpeg::convert(config)
+                    .map_err(|e| anyhow::anyhow!("Error converting png to jpg: {:?}", e)),
                 (input_extension, output_extension) => {
                     anyhow::bail!("Unsupported conversion: {input_extension} -> {output_extension}",)
                 }
@@ -283,6 +285,20 @@ mod tests {
         convert(&Config {
             input_path: &"tests/files/not_existing.png".into(),
             output_path: &"target/test1.webp".into(),
+            width: Some(100),
+            height: None,
+        })
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic = "Error converting png to jpg"]
+    fn convert_panic_png_to_jpg() {
+        use super::*;
+
+        convert(&Config {
+            input_path: &"tests/files/not_existing.png".into(),
+            output_path: &"target/test1.jpg".into(),
             width: Some(100),
             height: None,
         })
