@@ -8,6 +8,12 @@
             "type": "shell",
             "command": "just coverage",
             "problemMatcher": []
+        },
+        {
+            "label": "docker-test",
+            "type": "shell",
+            "command": "just docker-test",
+            "problemMatcher": []
         }
     ]
 }
