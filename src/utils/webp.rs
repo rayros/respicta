@@ -19,7 +19,7 @@ where
     let rgba_image = input_image.into_rgba8();
 
     let mut webp_config = WebPConfig::new().unwrap();
-    webp_config.lossless = 0;
+    webp_config.lossless = 1;
     webp_config.alpha_compression = 1;
     webp_config.quality = 1.0;
 
