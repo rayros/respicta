@@ -35,3 +35,6 @@ coverage-html:
   --ignore="src/main.rs" \
   -t html \
   -o coverage/html
+
+docker-test:
+  docker build -t respicta . --target test
