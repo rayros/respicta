@@ -49,14 +49,17 @@ pub fn convert(config: &Config) -> anyhow::Result<()> {
         config
             .input_path()
             .extension()
-            .and_then(std::ffi::OsStr::to_str),
+            // to lower case
+            .and_then(std::ffi::OsStr::to_str)
+            .map(str::to_lowercase),
         config
             .output_path()
             .extension()
-            .and_then(std::ffi::OsStr::to_str),
+            .and_then(std::ffi::OsStr::to_str)
+            .map(str::to_lowercase),
     ) {
         (Some(input_extension), Some(output_extension)) => {
-            match (input_extension, output_extension) {
+            match (input_extension.as_str(), output_extension.as_str()) {
                 (GIF, GIF) => gif2gif::convert(config)
                     .map_err(|e| anyhow::anyhow!("Error converting gif to gif: {:?}", e)),
                 (GIF, WEBP) => gif2webp::convert(config)
@@ -163,6 +166,19 @@ mod tests {
         })?;
 
         Ok(())
+    }
+
+    #[test]
+    fn extension_in_uppercase() {
+        use super::*;
+
+        convert(&Config {
+            input_path: &"tests/files/convert_test1.JPG".into(),
+            output_path: &"target/convert_test1.webp".into(),
+            width: Some(100),
+            height: None,
+        })
+        .unwrap();
     }
 
     #[test]
