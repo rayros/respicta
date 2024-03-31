@@ -169,6 +169,19 @@ mod tests {
     }
 
     #[test]
+    fn survive_extension_wrong_format_jpg_to_webp() {
+        use super::*;
+
+        convert(&Config {
+            input_path: &"tests/files/convert_test2.jpg".into(),
+            output_path: &"target/convert_test8.webp".into(),
+            width: Some(500),
+            height: None,
+        })
+        .unwrap();
+    }
+
+    #[test]
     fn extension_in_uppercase() {
         use super::*;
 
