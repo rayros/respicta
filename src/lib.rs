@@ -152,6 +152,20 @@ mod tests {
     }
 
     #[test]
+    fn convert_jfif_to_webp() -> anyhow::Result<()> {
+        use super::*;
+
+        convert(&Config {
+            input_path: &"tests/files/convert_test_jfif.jfif".into(),
+            output_path: &"target/convert_test7.webp".into(),
+            width: Some(500),
+            height: None,
+        })?;
+
+        Ok(())
+    }
+
+    #[test]
     #[should_panic = "Unsupported conversion: jpg -> tiff"]
     fn convert_panic() {
         use super::*;

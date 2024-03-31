@@ -4,7 +4,7 @@ pub fn convert<T>(config: &T) -> anyhow::Result<()>
 where
     T: InputOutput + Dimensions,
 {
-    webp::optimize(config)
+    webp::optimize(config, image::ImageFormat::WebP)
 }
 
 #[cfg(test)]

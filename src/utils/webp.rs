@@ -1,7 +1,7 @@
-use std::path::PathBuf;
+use std::{fs::File, io::BufReader, path::PathBuf};
 
 use anyhow::bail;
-use image::GenericImageView;
+use image::{GenericImageView, ImageFormat};
 use libwebp_sys::{
     VP8StatusCode, WebPConfig, WebPEncode, WebPMemoryWrite, WebPMemoryWriter, WebPMemoryWriterInit,
     WebPPicture, WebPPictureFree, WebPPictureImportRGBA, WebPPictureRescale, WebPValidateConfig,
@@ -9,11 +9,14 @@ use libwebp_sys::{
 
 use crate::{Dimensions, InputOutput};
 
-pub fn optimize<T>(config: &T) -> anyhow::Result<()>
+pub fn optimize<T>(config: &T, format: ImageFormat) -> anyhow::Result<()>
 where
     T: InputOutput + Dimensions,
 {
-    let input_image = image::open(config.input_path())?;
+    let input_file = File::open(config.input_path())?;
+    let input_reader = BufReader::new(input_file);
+
+    let input_image = image::load(input_reader, format).unwrap();
 
     let dimensions = input_image.dimensions();
     let rgba_image = input_image.into_rgba8();
@@ -99,12 +102,15 @@ mod tests {
     fn webp_optimize_png_to_webp() {
         use super::*;
 
-        optimize(&Config {
-            input_path: &"tests/files/issue-159.png".into(),
-            output_path: &"target/issue-159.webp".into(),
-            width: Some(100),
-            height: Some(100),
-        })
+        optimize(
+            &Config {
+                input_path: &"tests/files/issue-159.png".into(),
+                output_path: &"target/issue-159.webp".into(),
+                width: Some(100),
+                height: Some(100),
+            },
+            ImageFormat::Png,
+        )
         .unwrap();
     }
 
@@ -112,12 +118,15 @@ mod tests {
     fn webp_optimize_gif_to_webp_static() {
         use super::*;
 
-        optimize(&Config {
-            input_path: &"tests/files/test1.gif".into(),
-            output_path: &"target/gif_test1_static.webp".into(),
-            width: Some(100),
-            height: Some(100),
-        })
+        optimize(
+            &Config {
+                input_path: &"tests/files/test1.gif".into(),
+                output_path: &"target/gif_test1_static.webp".into(),
+                width: Some(100),
+                height: Some(100),
+            },
+            ImageFormat::Gif,
+        )
         .unwrap();
     }
 
