@@ -9,7 +9,7 @@ where
     T: InputOutput + Dimensions,
 {
     let output_path = config.output_path();
-    let step1_output_path = &output_path.with_extension("step1");
+    let step1_output_path = &output_path.with_extension("step1.png");
     let magick_config = magick::Config {
         input_path: config.input_path(),
         output_path: step1_output_path,
