@@ -1,14 +1,14 @@
 use image::io::Reader as ImageReader;
 use std::path::PathBuf;
 
+use crate::{Dimensions, InputOutput};
 use anyhow::{anyhow, bail};
 use image::GenericImageView;
 use libwebp_sys::{
-    VP8StatusCode, WebPConfig, WebPEncode, WebPMemoryWrite, WebPMemoryWriter, WebPMemoryWriterInit,
-    WebPPicture, WebPPictureFree, WebPPictureImportRGBA, WebPPictureRescale, WebPValidateConfig,
+    VP8StatusCode, WebPConfig, WebPEncode, WebPMemoryWrite, WebPMemoryWriter,
+    WebPMemoryWriterClear, WebPMemoryWriterInit, WebPPicture, WebPPictureFree,
+    WebPPictureImportRGBA, WebPPictureRescale, WebPValidateConfig,
 };
-
-use crate::{Dimensions, InputOutput};
 
 pub fn optimize<T>(config: &T) -> anyhow::Result<()>
 where
@@ -42,7 +42,8 @@ where
             bail!("Invalid WebP configuration");
         }
 
-        WebPMemoryWriterInit(ww.as_mut_ptr());
+        let memory_writer_ptr = ww.as_mut_ptr();
+        WebPMemoryWriterInit(memory_writer_ptr);
         WebPPictureImportRGBA(&mut picture, rgba_image.as_ptr(), dimension_width * 4);
 
         let target_width = config
@@ -62,12 +63,13 @@ where
             bail!("Error encoding WebP: {:?}", picture.error_code);
         }
 
-        let ww = ww.assume_init();
-        let contents = std::slice::from_raw_parts(ww.mem, ww.size);
+        let memory_writer = ww.assume_init();
+        let contents = std::slice::from_raw_parts(memory_writer.mem, memory_writer.size);
 
         std::fs::write(config.output_path(), contents)?;
 
         WebPPictureFree(&mut picture);
+        WebPMemoryWriterClear(memory_writer_ptr);
     }
 
     Ok(())
