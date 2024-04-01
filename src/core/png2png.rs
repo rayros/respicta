@@ -32,7 +32,7 @@ mod tests {
     use crate::Config;
 
     #[test]
-    fn png2png() {
+    fn png2png_test1() {
         use super::*;
 
         convert(&Config {
@@ -40,6 +40,19 @@ mod tests {
             output_path: &"target/png2png_test1.png".into(),
             width: Some(100),
             height: None,
+        })
+        .unwrap();
+    }
+
+    #[test]
+    fn png2png_test2() {
+        use super::*;
+
+        convert(&Config {
+            input_path: &"tests/files/png2png_test2.png".into(),
+            output_path: &"target/png2png_test2.png".into(),
+            width: Some(100),
+            height: Some(100),
         })
         .unwrap();
     }
