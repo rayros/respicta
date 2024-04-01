@@ -1,7 +1,7 @@
 use image::io::Reader as ImageReader;
 use std::path::PathBuf;
 
-use anyhow::bail;
+use anyhow::{anyhow, bail};
 use image::GenericImageView;
 use libwebp_sys::{
     VP8StatusCode, WebPConfig, WebPEncode, WebPMemoryWrite, WebPMemoryWriter, WebPMemoryWriterInit,
@@ -19,17 +19,19 @@ where
         .decode()?;
 
     let dimensions = input_image.dimensions();
+    let dimension_width = i32::try_from(dimensions.0)?;
+    let dimension_height = i32::try_from(dimensions.1)?;
     let rgba_image = input_image.into_rgba8();
 
-    let mut webp_config = WebPConfig::new().unwrap();
+    let mut webp_config = WebPConfig::new().map_err(|()| anyhow!("Error creating WebP config"))?;
     webp_config.lossless = 1;
     webp_config.alpha_compression = 1;
     webp_config.quality = 1.0;
 
-    let mut picture = WebPPicture::new().unwrap();
+    let mut picture = WebPPicture::new().map_err(|()| anyhow!("Error creating WebP picture"))?;
     picture.use_argb = 1;
-    picture.width = dimensions.0 as i32;
-    picture.height = dimensions.1 as i32;
+    picture.width = dimension_width;
+    picture.height = dimension_height;
 
     let mut ww: ::core::mem::MaybeUninit<WebPMemoryWriter> = ::core::mem::MaybeUninit::uninit();
     picture.writer = Some(WebPMemoryWrite);
@@ -39,22 +41,31 @@ where
         if WebPValidateConfig(&webp_config) == 0 {
             bail!("Invalid WebP configuration");
         }
+
         WebPMemoryWriterInit(ww.as_mut_ptr());
-        WebPPictureImportRGBA(
-            &mut picture,
-            rgba_image.as_ptr(),
-            i32::try_from(dimensions.0).unwrap() * 4,
-        );
-        let target_width = config.width().unwrap_or(0);
-        let target_height = config.height().unwrap_or(0);
-        WebPPictureRescale(&mut picture, target_width as i32, target_height as i32);
+        WebPPictureImportRGBA(&mut picture, rgba_image.as_ptr(), dimension_width * 4);
+
+        let target_width = config
+            .width()
+            .and_then(|w| i32::try_from(w).ok())
+            .unwrap_or(0);
+        let target_height = config
+            .height()
+            .and_then(|h| i32::try_from(h).ok())
+            .unwrap_or(0);
+
+        WebPPictureRescale(&mut picture, target_width, target_height);
+
         let encode_result = WebPEncode(&webp_config, &mut picture);
+
         if encode_result == VP8StatusCode::VP8_STATUS_OK as i32 {
             bail!("Error encoding WebP: {:?}", picture.error_code);
         }
+
         let ww = ww.assume_init();
         let contents = std::slice::from_raw_parts(ww.mem, ww.size);
-        std::fs::write(config.output_path(), contents).unwrap();
+
+        std::fs::write(config.output_path(), contents)?;
 
         WebPPictureFree(&mut picture);
     }
