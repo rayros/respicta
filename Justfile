@@ -38,3 +38,7 @@ coverage-html:
 
 docker-test:
   docker build -t respicta . --target test
+
+memprofile:
+  RUSTFLAGS="-g" cargo build --release \
+  && heaptrack ./target/release/respicta server 
