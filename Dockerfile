@@ -3,8 +3,10 @@ FROM rust:slim-bookworm as build
 WORKDIR /
 
 RUN apt-get update \
- && apt-get -y install curl build-essential clang pkg-config libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp libssl-dev \
+ && apt-get -y install curl build-essential cmake clang pkg-config libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp libssl-dev \
  && rm -rfv /var/lib/apt/lists/*
+
+RUN cargo install cargo-semver-checks --locked
 
 ENV MAGICK_VERSION 7.1.1-29
 
@@ -35,6 +37,10 @@ FROM build as test
 COPY ./tests ./tests
 
 RUN cargo test
+
+FROM build as semver-checks
+
+RUN cargo semver-checks
 
 FROM build as release
 
