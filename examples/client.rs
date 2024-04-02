@@ -4,12 +4,14 @@ use std::io::Write;
 async fn main() {
     let multipart = reqwest::multipart::Form::new().part(
         "file",
-        reqwest::multipart::Part::bytes(include_bytes!("../tests/files/issue-159.png").to_vec())
-            .file_name("issue-159.png"),
+        reqwest::multipart::Part::bytes(
+            include_bytes!("../tests/files/convert_test1.JPG").to_vec(),
+        )
+        .file_name("convert_test1.JPG"),
     );
     let response = reqwest::Client::new()
         .post("http://localhost:3000/")
-        .header("extension", "jpeg")
+        .header("extension", "png")
         .multipart(multipart)
         .send()
         .await
