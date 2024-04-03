@@ -1,4 +1,4 @@
-name: Rust
+name: Release to crate.io
 
 on:
   push:
