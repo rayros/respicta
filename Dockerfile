@@ -38,13 +38,13 @@ COPY ./tests ./tests
 
 RUN cargo test
 
-FROM build as semver-checks
-
-RUN cargo semver-checks
-
 FROM build as release
 
 RUN cargo build --release
+
+FROM test as publish
+
+RUN cargo semver-checks && cargo publish
 
 FROM debian:bookworm-slim
 
