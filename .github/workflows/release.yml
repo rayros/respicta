@@ -22,5 +22,5 @@ jobs:
           context: .
           file: ./Dockerfile
           target: publish
-          secrets: |
-            CARGO_REGISTRY_TOKEN=${{ secrets.CARGO_REGISTRY_TOKEN }}
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
