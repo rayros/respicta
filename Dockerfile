@@ -1,12 +1,10 @@
-FROM rust:slim-bookworm as build
+FROM rust:slim-bookworm as base
 
 WORKDIR /
 
 RUN apt-get update \
  && apt-get -y install curl build-essential cmake clang pkg-config libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp libssl-dev \
  && rm -rfv /var/lib/apt/lists/*
-
-RUN cargo install cargo-semver-checks --locked
 
 ENV MAGICK_VERSION 7.1.1-29
 
@@ -17,6 +15,8 @@ RUN curl https://imagemagick.org/archive/ImageMagick-${MAGICK_VERSION}.tar.gz | 
  && make install \
  && cd .. \
  && rm -r ImageMagick-${MAGICK_VERSION}*
+
+FROM base as build
 
 RUN cargo new app
 
@@ -42,7 +42,13 @@ FROM build as release
 
 RUN cargo build --release
 
-FROM test as publish
+FROM base as publish
+
+RUN cargo install cargo-semver-checks --locked
+
+WORKDIR /publish
+
+COPY . ./
 
 RUN --mount=type=secret,id=CARGO_REGISTRY_TOKEN \
    export CARGO_REGISTRY_TOKEN=$(cat /run/secrets/CARGO_REGISTRY_TOKEN) \
