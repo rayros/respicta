@@ -24,3 +24,5 @@ jobs:
           target: publish
           secrets: |
             CARGO_REGISTRY_TOKEN=${{ secrets.CARGO_REGISTRY_TOKEN }}
+          cache-from: type=gha
+          cache-to: type=gha
