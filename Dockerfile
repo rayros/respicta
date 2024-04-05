@@ -44,7 +44,10 @@ RUN cargo build --release
 
 FROM test as publish
 
-RUN cargo semver-checks && cargo publish
+RUN --mount=type=secret,id=CARGO_REGISTRY_TOKEN \
+   export CARGO_REGISTRY_TOKEN=$(cat /run/secrets/CARGO_REGISTRY_TOKEN) \
+   && cargo semver-checks \
+   && cargo publish
 
 FROM debian:bookworm-slim
 
