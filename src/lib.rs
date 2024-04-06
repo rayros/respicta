@@ -44,6 +44,14 @@ impl Dimensions for Config<'_> {
     }
 }
 
+/// # Errors
+///
+/// Returns an error if:
+/// * The input file path has no extension
+/// * The output file path has no extension
+/// * The conversion is not supported
+/// * An error occurs during the conversion
+///
 pub fn convert(config: &Config) -> anyhow::Result<()> {
     match (
         config
