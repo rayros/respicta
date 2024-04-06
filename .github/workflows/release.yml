@@ -25,4 +25,4 @@ jobs:
           secrets: |
             CARGO_REGISTRY_TOKEN=${{ secrets.CARGO_REGISTRY_TOKEN }}
           cache-from: type=gha
-          cache-to: type=gha
+          cache-to: type=gha,mode=max
