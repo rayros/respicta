@@ -3,6 +3,10 @@ use crate::{
     Config, Dimensions, InputOutput,
 };
 
+/// # Errors
+///
+/// Returns an error if the gifsicle command fails or if the input file does not exist.
+///
 pub fn convert<T>(config: &T) -> std::result::Result<(), std::io::Error>
 where
     T: InputOutput + Dimensions,
