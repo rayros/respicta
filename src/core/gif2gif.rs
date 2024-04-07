@@ -3,6 +3,7 @@ use crate::{utils::gifsicle, Dimensions, InputOutput};
 /// # Errors
 ///
 /// Returns an error if the conversion fails.
+///
 pub fn convert<T>(config: &T) -> std::result::Result<(), std::io::Error>
 where
     T: InputOutput + Dimensions,
