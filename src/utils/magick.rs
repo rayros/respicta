@@ -15,6 +15,10 @@ pub struct Config<'a> {
     pub height: Option<u32>,
 }
 
+/// # Errors
+///
+/// Returns an error if the optimization fails.
+///
 pub fn optimize(config: &Config) -> Result<(), magick_rust::MagickError> {
     START.call_once(|| {
         magick_wand_genesis();

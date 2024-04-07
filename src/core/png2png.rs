@@ -4,6 +4,10 @@ use crate::utils::{magick, oxipng};
 
 use crate::{Dimensions, InputOutput};
 
+/// # Errors
+///
+/// Returns an error if the conversion fails.
+///
 pub fn convert<T>(config: &T) -> Result<(), Box<dyn Error>>
 where
     T: InputOutput + Dimensions,

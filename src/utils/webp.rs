@@ -10,6 +10,10 @@ use libwebp_sys::{
     WebPPictureImportRGBA, WebPPictureRescale, WebPValidateConfig,
 };
 
+/// # Errors
+///
+/// Returns an error if the optimization fails.
+///
 pub fn optimize<T>(config: &T) -> anyhow::Result<()>
 where
     T: InputOutput + Dimensions,

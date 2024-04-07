@@ -19,6 +19,10 @@ impl InputOutput for Config<'_> {
     }
 }
 
+/// # Errors
+///
+/// Returns an error if the optimization fails.
+///
 pub fn optimize<T>(config: &T) -> Result<(), oxipng::PngError>
 where
     T: InputOutput,

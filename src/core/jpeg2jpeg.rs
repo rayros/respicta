@@ -1,5 +1,9 @@
 use crate::{utils::magick, Dimensions, InputOutput};
 
+/// # Errors
+///
+/// Returns an error if the conversion fails.
+///
 pub fn convert<T>(config: &T) -> std::result::Result<(), magick_rust::MagickError>
 where
     T: InputOutput + Dimensions,

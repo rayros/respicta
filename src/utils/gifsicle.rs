@@ -27,6 +27,10 @@ fn process_exit_code(code: Option<i32>) -> std::result::Result<(), std::io::Erro
     }
 }
 
+/// # Errors
+///
+/// Returns an error if the gifsicle command fails.
+///
 pub fn optimize<T>(config: &T) -> std::result::Result<(), std::io::Error>
 where
     T: InputOutput + Dimensions,

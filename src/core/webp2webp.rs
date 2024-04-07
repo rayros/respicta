@@ -1,5 +1,9 @@
 use crate::{utils::webp, Dimensions, InputOutput};
 
+/// # Errors
+///
+/// Returns an error if the conversion fails.
+///
 pub fn convert<T>(config: &T) -> anyhow::Result<()>
 where
     T: InputOutput + Dimensions,
