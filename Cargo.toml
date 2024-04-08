@@ -11,15 +11,35 @@ exclude = [".github", ".vscode", "tests"]
 
 [dependencies]
 anyhow = "1.0.80"
-axum = { version = "0.7.4", features = ["multipart"] }
-clap = { version = "4.5.3", features = ["derive"] }
 image = "0.25.0"
 libwebp-sys = "0.9.5"
 magick_rust = "0.20.0"
-oxipng = "9.0.0"
-tempfile = "3.10.1"
-tokio = { version = "1.36.0", features = ["full"] }
+oxipng = { version = "9.0", features = ["parallel", "zopfli", "filetime"], default-features = false }
+tempfile = { version = "3.10.1", optional = true }
+axum = { version = "0.7.4", features = ["multipart"], optional = true }
+clap = { version = "4.5.3", features = ["derive"], optional = true }
+tokio = { version = "1.36.0", features = ["full"], optional = true }
 
 [dev-dependencies]
 axum-test = "14.4.0"
 reqwest = { version = "0.12.2", features = ["multipart"] }
+
+[features]
+tokio = ["dep:tokio"]
+web-service = ["tokio", "axum", "tempfile"]
+cli = ["clap", "web-service"]
+
+[[example]]
+name = "client"
+path = "examples/client.rs"
+required-features = ["tokio"]
+
+[[example]]
+name = "server"
+path = "examples/server.rs"
+required-features = ["web-service"]
+
+[[example]]
+name = "client_n"
+path = "examples/client_n.rs"
+required-features = ["tokio"]

@@ -1,5 +1,6 @@
 pub mod core;
 pub mod extensions;
+#[cfg(feature = "web-service")]
 pub mod server;
 pub mod utils;
 
