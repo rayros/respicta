@@ -6,7 +6,7 @@ RUN apt-get update \
  && apt-get -y install curl build-essential cmake clang pkg-config libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp libssl-dev \
  && rm -rfv /var/lib/apt/lists/*
 
-ENV MAGICK_VERSION 7.1.1-29
+ENV MAGICK_VERSION 7.1.1-30
 
 RUN curl https://imagemagick.org/archive/ImageMagick-${MAGICK_VERSION}.tar.gz | tar xz \
  && cd ImageMagick-${MAGICK_VERSION} \
@@ -68,5 +68,8 @@ COPY --from=release /app/target/release/respicta /usr/local/bin/respicta
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
 WORKDIR /images
+
+# smoke test
+RUN respicta
 
 ENTRYPOINT ["/bin/bash", "-c", "respicta \"$@\"", "--"]
