@@ -40,7 +40,7 @@ RUN cargo test
 
 FROM build as release
 
-RUN cargo build --release
+RUN cargo build --release --features=cli
 
 FROM base as publish
 
