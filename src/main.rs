@@ -134,5 +134,5 @@ async fn main() {
 
 #[cfg(not(feature = "cli"))]
 fn main() {
-    println!("Please enable the `cli` feature to use the CLI");
+    unimplemented!("Please enable the `cli` feature to use the CLI")
 }
