@@ -70,6 +70,6 @@ ENV LD_LIBRARY_PATH=/usr/local/lib
 WORKDIR /images
 
 # smoke test
-RUN respicta
+RUN respicta --help
 
 ENTRYPOINT ["/bin/bash", "-c", "respicta \"$@\"", "--"]
