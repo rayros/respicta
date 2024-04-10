@@ -16,6 +16,8 @@ Respicta is a versatile project offering a library, command-line interface (CLI)
 
 **Web Service**: Host a web service to resize images on-the-fly.
 
+## Supported conversions 
+
 ## Convert
 
 ```bash
