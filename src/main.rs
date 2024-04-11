@@ -4,6 +4,7 @@ mod cli {
     use respicta::server::app;
     use std::path::PathBuf;
     use tokio::{net::TcpListener, signal};
+
     #[derive(Parser)]
     #[command(version, about, long_about = None, arg_required_else_help = true)]
     pub struct Cli {
@@ -103,11 +104,11 @@ mod cli {
 #[cfg(feature = "cli")]
 #[tokio::main]
 async fn main() {
-    use crate::cli::Commands;
+    use crate::cli::{start_server, Cli, Commands};
     use clap::Parser;
     use respicta::{convert, Config};
 
-    let cli = cli::Cli::parse();
+    let cli = Cli::parse();
 
     match cli.command {
         Some(Commands::Convert {
@@ -116,18 +117,14 @@ async fn main() {
             width,
             height,
             ..
-        }) => {
-            convert(&Config {
-                input_path: &input_path,
-                output_path: &output_path,
-                width,
-                height,
-            })
-            .unwrap();
-        }
-        Some(Commands::Server { address, limit }) => {
-            cli::start_server(address, limit).await.unwrap();
-        }
+        }) => convert(&Config {
+            input_path: &input_path,
+            output_path: &output_path,
+            width,
+            height,
+        })
+        .unwrap(),
+        Some(Commands::Server { address, limit }) => start_server(address, limit).await.unwrap(),
         None => unreachable!(),
     }
 }
