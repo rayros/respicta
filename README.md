@@ -18,6 +18,11 @@ Respicta is a versatile project offering a library, command-line interface (CLI)
 
 ## Supported conversions 
 
+- Gif to WebP
+- Jpeg to WebP
+- Png to Jpeg
+- Png to WebP
+
 ## Convert
 
 ```bash
