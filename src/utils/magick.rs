@@ -3,9 +3,6 @@
 use magick_rust::{magick_wand_genesis, MagickWand};
 use std::{path::PathBuf, sync::Once};
 
-// Used to make sure MagickWand is initialized exactly once. Note that we
-// do not bother shutting down, we simply exit when we're done.
-
 static START: Once = Once::new();
 
 pub struct Config<'a> {
