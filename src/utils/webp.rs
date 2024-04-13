@@ -10,6 +10,8 @@ use libwebp_sys::{
     WebPPictureImportRGBA, WebPPictureRescale, WebPValidateConfig,
 };
 
+// TODO Create function which will take rgba image and return webp image
+
 /// # Errors
 ///
 /// Returns an error if the optimization fails.
