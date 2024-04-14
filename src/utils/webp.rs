@@ -10,7 +10,66 @@ use libwebp_sys::{
     WebPPictureImportRGBA, WebPPictureRescale, WebPValidateConfig,
 };
 
-// TODO Create function which will take rgba image and return webp image
+pub struct RGBAImage {
+    pub data: *const u8,
+    pub width: i32,
+    pub height: i32,
+}
+
+fn rgba_to_webp<T>(image: &RGBAImage, config: &T) -> anyhow::Result<Vec<u8>>
+where
+    T: Dimensions,
+{
+    let mut webp_config = WebPConfig::new().map_err(|()| anyhow!("Error creating WebP config"))?;
+    webp_config.lossless = 1;
+    webp_config.alpha_compression = 1;
+    webp_config.quality = 1.0;
+
+    let mut picture = WebPPicture::new().map_err(|()| anyhow!("Error creating WebP picture"))?;
+    picture.use_argb = 1;
+    picture.width = image.width;
+    picture.height = image.height;
+
+    let mut ww: ::core::mem::MaybeUninit<WebPMemoryWriter> = ::core::mem::MaybeUninit::uninit();
+    picture.writer = Some(WebPMemoryWrite);
+    picture.custom_ptr = ww.as_mut_ptr().cast::<std::ffi::c_void>();
+
+    unsafe {
+        if WebPValidateConfig(&webp_config) == 0 {
+            bail!("Invalid WebP configuration");
+        }
+
+        let memory_writer_ptr = ww.as_mut_ptr();
+        WebPMemoryWriterInit(memory_writer_ptr);
+        WebPPictureImportRGBA(&mut picture, image.data, image.width * 4);
+
+        let target_width = config
+            .width()
+            .and_then(|w| i32::try_from(w).ok())
+            .unwrap_or(0);
+
+        let target_height = config
+            .height()
+            .and_then(|h| i32::try_from(h).ok())
+            .unwrap_or(0);
+
+        WebPPictureRescale(&mut picture, target_width, target_height);
+
+        let encode_result = WebPEncode(&webp_config, &mut picture);
+
+        if encode_result == VP8StatusCode::VP8_STATUS_OK as i32 {
+            bail!("Error encoding WebP: {:?}", picture.error_code);
+        }
+
+        let memory_writer = ww.assume_init();
+        let contents = std::slice::from_raw_parts(memory_writer.mem, memory_writer.size).to_vec();
+
+        WebPPictureFree(&mut picture);
+        WebPMemoryWriterClear(memory_writer_ptr);
+
+        Ok(contents)
+    }
+}
 
 /// # Errors
 ///
@@ -29,56 +88,17 @@ where
     let dimension_height = i32::try_from(dimensions.1)?;
     let rgba_image = input_image.into_rgba8();
 
-    let mut webp_config = WebPConfig::new().map_err(|()| anyhow!("Error creating WebP config"))?;
-    webp_config.lossless = 1;
-    webp_config.alpha_compression = 1;
-    webp_config.quality = 1.0;
+    let rgba_image = RGBAImage {
+        data: rgba_image.as_ptr(),
+        width: dimension_width,
+        height: dimension_height,
+    };
+    let contents = rgba_to_webp(&rgba_image, config);
 
-    let mut picture = WebPPicture::new().map_err(|()| anyhow!("Error creating WebP picture"))?;
-    picture.use_argb = 1;
-    picture.width = dimension_width;
-    picture.height = dimension_height;
-
-    let mut ww: ::core::mem::MaybeUninit<WebPMemoryWriter> = ::core::mem::MaybeUninit::uninit();
-    picture.writer = Some(WebPMemoryWrite);
-    picture.custom_ptr = ww.as_mut_ptr().cast::<std::ffi::c_void>();
-
-    unsafe {
-        if WebPValidateConfig(&webp_config) == 0 {
-            bail!("Invalid WebP configuration");
-        }
-
-        let memory_writer_ptr = ww.as_mut_ptr();
-        WebPMemoryWriterInit(memory_writer_ptr);
-        WebPPictureImportRGBA(&mut picture, rgba_image.as_ptr(), dimension_width * 4);
-
-        let target_width = config
-            .width()
-            .and_then(|w| i32::try_from(w).ok())
-            .unwrap_or(0);
-        let target_height = config
-            .height()
-            .and_then(|h| i32::try_from(h).ok())
-            .unwrap_or(0);
-
-        WebPPictureRescale(&mut picture, target_width, target_height);
-
-        let encode_result = WebPEncode(&webp_config, &mut picture);
-
-        if encode_result == VP8StatusCode::VP8_STATUS_OK as i32 {
-            bail!("Error encoding WebP: {:?}", picture.error_code);
-        }
-
-        let memory_writer = ww.assume_init();
-        let contents = std::slice::from_raw_parts(memory_writer.mem, memory_writer.size);
-
-        std::fs::write(config.output_path(), contents)?;
-
-        WebPPictureFree(&mut picture);
-        WebPMemoryWriterClear(memory_writer_ptr);
+    match contents {
+        Ok(contents) => Ok(std::fs::write(config.output_path(), contents)?),
+        Err(e) => bail!(e),
     }
-
-    Ok(())
 }
 
 pub struct GifConfig<'a> {
