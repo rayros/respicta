@@ -82,8 +82,39 @@ fn main() {
 }
 ```
 
-# Kubernetes
+# Kubernetes example use
 
+How to use respicta inside pod for your custom resizer service.
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: my-resizer-service
+  name: my-resizer-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-resizer-service
+  template:
+    metadata:
+      labels:
+        app: my-resizer-service
+    spec:
+      containers:
+        - image: rayros/respicta
+          name: respicta
+          args: ["server", "--address", "0.0.0.0:4000"]
+        - image: main-app-image:latest
+          name: main-app
+          ports:
+            - containerPort: 2137
+          env:
+            - name: RESPICTA_HREF
+              value: http://localhost:4000
+```
 
 ---
 
