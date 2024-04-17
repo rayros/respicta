@@ -23,7 +23,9 @@ Respicta is a versatile project offering a library, command-line interface (CLI)
 - Png to Jpeg
 - Png to WebP
 
-## Convert
+## CLI
+
+### Convert
 
 ```bash
 docker run --rm -v ./:/images rayros/respicta convert --help
@@ -49,7 +51,7 @@ Examples:
   image-resizer convert --width 100 --height 100 input.jpg output.jpg
 ```
 
-## Server
+### Server
 
 ```bash
 docker run --rm rayros/respicta server --help
@@ -82,7 +84,7 @@ fn main() {
 }
 ```
 
-# Kubernetes example use
+# Kubernetes example use (server)
 
 How to use respicta inside pod for your custom resizer service.
 
@@ -115,6 +117,10 @@ spec:
             - name: RESPICTA_HREF
               value: http://localhost:4000
 ```
+
+# WIP
+
+- command-server - send cli commands via http
 
 ---
 
