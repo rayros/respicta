@@ -1,7 +1,7 @@
 #[cfg(feature = "cli")]
 mod cli {
+    use axum::Router;
     use clap::{Parser, Subcommand};
-    use respicta::server::app;
     use std::path::PathBuf;
     use tokio::{net::TcpListener, signal};
 
@@ -17,12 +17,11 @@ mod cli {
         #[clap(
             arg_required_else_help = true,
             disable_help_flag = true,
-            after_help = "
-    Examples:
-    
-      respicta convert --width 100 --height 100 input.jpg output.jpg
-    
-    "
+            after_help = "\
+                Examples: \n\
+                \n\
+                respicta convert --width 100 --height 100 input.jpg output.jpg
+                "
         )]
         /// Convert images from one format to another
         Convert {
@@ -41,7 +40,7 @@ mod cli {
             #[clap(long, action = clap::ArgAction::HelpLong)]
             help: Option<bool>,
         },
-        /// Start a server to convert images
+        /// Start a server
         Server {
             /// Address to bind the server to (default: 0.0.0.0:3000)
             #[clap(short, long)]
@@ -50,19 +49,21 @@ mod cli {
             #[clap(short, long)]
             limit: Option<usize>,
         },
+        /// Start a command server
+        CommandServer {
+            /// Address to bind the server to (default: 0.0.0.0:3000)
+            #[clap(short, long)]
+            address: Option<String>,
+        },
     }
 
-    pub async fn start_server(
-        address: Option<String>,
-        limit: Option<usize>,
-    ) -> std::io::Result<()> {
+    pub async fn start_server(address: Option<String>, service: Router) -> std::io::Result<()> {
         let address = address.unwrap_or_else(|| "0.0.0.0:3000".to_string());
-        let app = app(limit);
         let listener = TcpListener::bind(address.clone()).await;
         match listener {
             Ok(listener) => {
                 println!("Server started at http://{address}");
-                axum::serve(listener, app)
+                axum::serve(listener, service)
                     .with_graceful_shutdown(shutdown_signal())
                     .await
             }
@@ -106,7 +107,7 @@ mod cli {
 async fn main() {
     use crate::cli::{start_server, Cli, Commands};
     use clap::Parser;
-    use respicta::{convert, Config};
+    use respicta::{convert, server::app, Config};
 
     let cli = Cli::parse();
 
@@ -124,7 +125,12 @@ async fn main() {
             height,
         })
         .unwrap(),
-        Some(Commands::Server { address, limit }) => start_server(address, limit).await.unwrap(),
+        Some(Commands::Server { address, limit }) => {
+            start_server(address, app(limit)).await.unwrap();
+        }
+        Some(Commands::CommandServer { address }) => {
+            start_server(address, app(None)).await.unwrap();
+        }
         None => unreachable!(),
     }
 }
