@@ -13,7 +13,7 @@ exclude = [".github", ".vscode", "tests"]
 anyhow = "1.0.82"
 image = "0.25.1"
 libwebp-sys = "0.9.5"
-magick_rust = "0.20.0"
+magick_rust = "0.21.0"
 oxipng = { version = "9.0", features = ["parallel", "zopfli", "filetime"], default-features = false }
 tempfile = { version = "3.10.1", optional = true }
 axum = { version = "0.7.5", features = ["multipart"], optional = true }
