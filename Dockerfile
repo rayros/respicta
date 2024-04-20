@@ -36,7 +36,7 @@ FROM build as test
 
 COPY ./tests ./tests
 
-RUN cargo test
+RUN cargo test --features=cli
 
 FROM build as release
 
