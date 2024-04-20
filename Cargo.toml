@@ -19,15 +19,17 @@ tempfile = { version = "3.10.1", optional = true }
 axum = { version = "0.7.5", features = ["multipart"], optional = true }
 clap = { version = "4.5.4", features = ["derive"], optional = true }
 tokio = { version = "1.37.0", features = ["macros", "rt-multi-thread", "fs", "signal"], optional = true }
+serde = { version = "1.0.130", features = ["derive"], optional = true }
 
 [dev-dependencies]
 axum-test = "14.8.0"
 reqwest = { version = "0.12.3", features = ["multipart"] }
 
 [features]
-tokio = ["dep:tokio"]
-web-service = ["tokio", "axum", "tempfile"]
-cli = ["clap", "web-service"]
+server-app-error = []
+web-service = ["tokio", "axum", "tempfile", "server-app-error"]
+command-server = ["tokio", "axum", "serde", "server-app-error"]
+cli = ["clap", "web-service", "command-server"]
 
 [[example]]
 name = "client"

@@ -1,3 +1,7 @@
+#[cfg(feature = "server-app-error")]
+pub mod app_error;
+#[cfg(feature = "command-server")]
+pub mod command_server;
 pub mod core;
 pub mod extensions;
 #[cfg(feature = "web-service")]

@@ -1775,6 +1775,7 @@ dependencies = [
  "magick_rust",
  "oxipng",
  "reqwest",
+ "serde",
  "tempfile",
  "tokio",
 ]

@@ -107,7 +107,7 @@ mod cli {
 async fn main() {
     use crate::cli::{start_server, Cli, Commands};
     use clap::Parser;
-    use respicta::{convert, server::app, Config};
+    use respicta::{command_server, convert, server, Config};
 
     let cli = Cli::parse();
 
@@ -126,10 +126,10 @@ async fn main() {
         })
         .unwrap(),
         Some(Commands::Server { address, limit }) => {
-            start_server(address, app(limit)).await.unwrap();
+            start_server(address, server::app(limit)).await.unwrap();
         }
         Some(Commands::CommandServer { address }) => {
-            start_server(address, app(None)).await.unwrap();
+            start_server(address, command_server::app()).await.unwrap();
         }
         None => unreachable!(),
     }
