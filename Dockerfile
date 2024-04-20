@@ -34,6 +34,7 @@ ENV LD_LIBRARY_PATH=/usr/local/lib
 
 FROM build as test
 
+COPY ./examples ./examples
 COPY ./tests ./tests
 
 RUN cargo test --features=cli
