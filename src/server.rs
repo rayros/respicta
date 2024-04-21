@@ -64,7 +64,6 @@ mod tests {
         let app = app(None);
         let server = TestServer::new(app).unwrap();
 
-        // test start server
         let response = server.get("/").await;
         assert_eq!(response.status_code(), StatusCode::METHOD_NOT_ALLOWED);
     }
