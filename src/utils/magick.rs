@@ -31,6 +31,7 @@ pub fn optimize(config: &Config) -> Result<(), magick_rust::MagickError> {
     wand.auto_orient();
     wand.strip_image()?;
 
+    // TODO use fit used in webp.rs
     let mut width_ratio = width as f64;
     width_ratio /= wand.get_image_width() as f64;
     let mut height_ratio = height as f64;

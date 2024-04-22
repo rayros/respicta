@@ -16,6 +16,40 @@ pub struct RGBAImage {
     pub height: i32,
 }
 
+pub struct NewDimensions {
+    pub width: Option<u32>,
+    pub height: Option<u32>,
+}
+
+impl Dimensions for NewDimensions {
+    fn width(&self) -> Option<u32> {
+        self.width
+    }
+
+    fn height(&self) -> Option<u32> {
+        self.height
+    }
+}
+
+impl NewDimensions {
+    fn fit_dimensions<T>(image: &RGBAImage, config: &T) -> NewDimensions
+    where
+        T: Dimensions,
+    {
+        let (new_width, new_height) = fit(
+            image.width as u32,
+            image.height as u32,
+            config.width().unwrap_or(image.width as u32),
+            config.height().unwrap_or(image.height as u32),
+        );
+
+        NewDimensions {
+            width: Some(new_width),
+            height: Some(new_height),
+        }
+    }
+}
+
 fn rgba_to_webp<T>(image: &RGBAImage, config: &T) -> anyhow::Result<Vec<u8>>
 where
     T: Dimensions,
@@ -71,6 +105,17 @@ where
     }
 }
 
+fn fit(width: u32, height: u32, max_width: u32, max_height: u32) -> (u32, u32) {
+    let width_ratio = f64::from(max_width) / f64::from(width);
+    let height_ratio = f64::from(max_height) / f64::from(height);
+
+    if width_ratio < height_ratio {
+        (max_width, (f64::from(height) * width_ratio) as u32)
+    } else {
+        ((f64::from(width) * height_ratio) as u32, max_height)
+    }
+}
+
 /// # Errors
 ///
 /// Returns an error if the optimization fails.
@@ -93,7 +138,10 @@ where
         width: dimension_width,
         height: dimension_height,
     };
-    let contents = rgba_to_webp(&rgba_image, config);
+
+    let new_dimensions = NewDimensions::fit_dimensions(&rgba_image, config);
+
+    let contents = rgba_to_webp(&rgba_image, &new_dimensions);
 
     match contents {
         Ok(contents) => Ok(std::fs::write(config.output_path(), contents)?),
