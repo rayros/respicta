@@ -37,7 +37,7 @@ FROM build as test
 COPY ./examples ./examples
 COPY ./tests ./tests
 
-RUN cargo test --features=cli
+RUN cargo test --all-features
 
 FROM build as release
 
