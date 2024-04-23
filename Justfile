@@ -3,7 +3,7 @@ coverage: coverage-build coverage-lcov coverage-html
 coverage-build:
   mkdir -p coverage
   rm -rf target_coverage
-  CARGO_TARGET_DIR="target_coverage" CARGO_INCREMENTAL=0 RUSTFLAGS='-Cinstrument-coverage' LLVM_PROFILE_FILE='target_coverage/coverage/%p-%m.profraw' cargo test
+  CARGO_TARGET_DIR="target_coverage" CARGO_INCREMENTAL=0 RUSTFLAGS='-Cinstrument-coverage' LLVM_PROFILE_FILE='target_coverage/coverage/%p-%m.profraw' cargo test --all-features
 
 coverage-lcov:
   grcov target_coverage/coverage \
