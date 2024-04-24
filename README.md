@@ -68,6 +68,8 @@ Options:
   -h, --help               Print help
 ```
 
+### Command-server - send cli commands via http
+
 # As a library
 
 ```rust
@@ -118,9 +120,6 @@ spec:
               value: http://localhost:4000
 ```
 
-# WIP
-
-- command-server - send cli commands via http
 
 ---
 
