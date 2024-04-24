@@ -63,12 +63,22 @@ Start a server to convert images
 Usage: respicta server [OPTIONS]
 
 Options:
-  -a, --address <ADDRESS>  Address to bind the server to (default: 0.0.0.0:3000)
+  -a, --address <ADDRESS>  Address to bind the server (default: 0.0.0.0:3000)
   -l, --limit <LIMIT>      Maximum file size in bytes (default: 10MB)
   -h, --help               Print help
 ```
 
 ### Command-server - send cli commands via http
+
+```plaintext
+Start a command server
+
+Usage: respicta command-server [OPTIONS]
+
+Options:
+  -a, --address <ADDRESS>  Address to bind the server (default: 0.0.0.0:3000)
+  -h, --help               Print help
+```
 
 # As a library
 

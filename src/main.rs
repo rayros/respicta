@@ -42,7 +42,7 @@ mod cli {
         },
         /// Start a server
         Server {
-            /// Address to bind the server to (default: 0.0.0.0:3000)
+            /// Address to bind the server (default: 0.0.0.0:3000)
             #[clap(short, long)]
             address: Option<String>,
             /// Maximum file size in bytes (default: 10MB)
@@ -51,7 +51,7 @@ mod cli {
         },
         /// Start a command server
         CommandServer {
-            /// Address to bind the server to (default: 0.0.0.0:3000)
+            /// Address to bind the server (default: 0.0.0.0:3000)
             #[clap(short, long)]
             address: Option<String>,
         },
