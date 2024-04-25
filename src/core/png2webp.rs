@@ -8,7 +8,7 @@ pub fn convert<T>(config: &T) -> anyhow::Result<()>
 where
     T: InputOutput + Dimensions,
 {
-    webp::optimize(config)
+    Ok(webp::optimize(config)?)
 }
 
 #[cfg(test)]

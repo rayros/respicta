@@ -1,11 +1,11 @@
 use image::io::Reader as ImageReader;
 use std::path::PathBuf;
+use thiserror::Error;
 
 use crate::{Dimensions, InputOutput};
-use anyhow::{anyhow, bail};
 use image::GenericImageView;
 use libwebp_sys::{
-    VP8StatusCode, WebPConfig, WebPEncode, WebPMemoryWrite, WebPMemoryWriter,
+    VP8StatusCode, WebPConfig, WebPEncode, WebPEncodingError, WebPMemoryWrite, WebPMemoryWriter,
     WebPMemoryWriterClear, WebPMemoryWriterInit, WebPPicture, WebPPictureFree,
     WebPPictureImportRGBA, WebPPictureRescale, WebPValidateConfig,
 };
@@ -50,16 +50,28 @@ impl NewDimensions {
     }
 }
 
-fn rgba_to_webp<T>(image: &RGBAImage, config: &T) -> anyhow::Result<Vec<u8>>
+#[derive(Debug, Error)]
+pub enum LibWebPError {
+    #[error("Failed to initialize WebP config")]
+    ConfigInit(()),
+    #[error("Failed to validate WebP config")]
+    ConfigValidate,
+    #[error("Failed to initialize WebP picture")]
+    Picture(()),
+    #[error("Failed to encode WebP image: {0:?}")]
+    Encoding(WebPEncodingError),
+}
+
+fn rgba_to_webp<T>(image: &RGBAImage, config: &T) -> Result<Vec<u8>, LibWebPError>
 where
     T: Dimensions,
 {
-    let mut webp_config = WebPConfig::new().map_err(|()| anyhow!("Error creating WebP config"))?;
+    let mut webp_config = WebPConfig::new().map_err(LibWebPError::ConfigInit)?;
     webp_config.lossless = 1;
     webp_config.alpha_compression = 1;
     webp_config.quality = 1.0;
 
-    let mut picture = WebPPicture::new().map_err(|()| anyhow!("Error creating WebP picture"))?;
+    let mut picture = WebPPicture::new().map_err(LibWebPError::Picture)?;
     picture.use_argb = 1;
     picture.width = image.width;
     picture.height = image.height;
@@ -70,7 +82,7 @@ where
 
     unsafe {
         if WebPValidateConfig(&webp_config) == 0 {
-            bail!("Invalid WebP configuration");
+            return Err(LibWebPError::ConfigValidate);
         }
 
         let memory_writer_ptr = ww.as_mut_ptr();
@@ -92,7 +104,7 @@ where
         let encode_result = WebPEncode(&webp_config, &mut picture);
 
         if encode_result == VP8StatusCode::VP8_STATUS_OK as i32 {
-            bail!("Error encoding WebP: {:?}", picture.error_code);
+            return Err(LibWebPError::Encoding(picture.error_code));
         }
 
         let memory_writer = ww.assume_init();
@@ -116,21 +128,36 @@ fn fit(width: u32, height: u32, max_width: u32, max_height: u32) -> (u32, u32) {
     }
 }
 
+#[derive(Debug, Error)]
+pub enum WebPError {
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+    #[error(transparent)]
+    Image(#[from] image::ImageError),
+    #[error(transparent)]
+    TryFromIntError(#[from] std::num::TryFromIntError),
+    #[error(transparent)]
+    LibWebPError(#[from] LibWebPError),
+}
+
 /// # Errors
 ///
 /// Returns an error if the optimization fails.
 ///
-pub fn optimize<T>(config: &T) -> anyhow::Result<()>
+pub fn optimize<T>(config: &T) -> Result<(), WebPError>
 where
     T: InputOutput + Dimensions,
 {
-    let input_image = ImageReader::open(config.input_path())?
-        .with_guessed_format()?
-        .decode()?;
+    let input_image = ImageReader::open(config.input_path())
+        .map_err(WebPError::Io)?
+        .with_guessed_format()
+        .map_err(WebPError::Io)?
+        .decode()
+        .map_err(WebPError::Image)?;
 
     let dimensions = input_image.dimensions();
-    let dimension_width = i32::try_from(dimensions.0)?;
-    let dimension_height = i32::try_from(dimensions.1)?;
+    let dimension_width = i32::try_from(dimensions.0).map_err(WebPError::TryFromIntError)?;
+    let dimension_height = i32::try_from(dimensions.1).map_err(WebPError::TryFromIntError)?;
     let rgba_image = input_image.into_rgba8();
 
     let rgba_image = RGBAImage {
@@ -141,12 +168,11 @@ where
 
     let new_dimensions = NewDimensions::fit_dimensions(&rgba_image, config);
 
-    let contents = rgba_to_webp(&rgba_image, &new_dimensions);
+    let contents = rgba_to_webp(&rgba_image, &new_dimensions).map_err(WebPError::LibWebPError)?;
 
-    match contents {
-        Ok(contents) => Ok(std::fs::write(config.output_path(), contents)?),
-        Err(e) => bail!(e),
-    }
+    std::fs::write(config.output_path(), contents).map_err(WebPError::Io)?;
+
+    Ok(())
 }
 
 pub struct GifConfig<'a> {
