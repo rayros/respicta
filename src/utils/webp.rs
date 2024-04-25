@@ -1,4 +1,4 @@
-use image::io::Reader as ImageReader;
+use image::io::Reader;
 use std::path::PathBuf;
 use thiserror::Error;
 
@@ -148,7 +148,7 @@ pub fn optimize<T>(config: &T) -> Result<(), WebPError>
 where
     T: InputOutput + Dimensions,
 {
-    let input_image = ImageReader::open(config.input_path())
+    let input_image = Reader::open(config.input_path())
         .map_err(WebPError::Io)?
         .with_guessed_format()
         .map_err(WebPError::Io)?
