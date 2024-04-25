@@ -11,6 +11,7 @@ exclude = [".github", ".vscode", "tests"]
 
 [dependencies]
 anyhow = "1.0.82"
+thiserror = "1.0.59"
 image = "0.25.1"
 libwebp-sys = "0.9.5"
 magick_rust = "0.21.0"
