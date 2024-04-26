@@ -1,14 +1,17 @@
-use crate::{utils::webp, Dimensions, InputOutput};
+use crate::{
+    utils::webp::{self, WebPError},
+    Dimensions, InputOutput,
+};
 
 /// # Errors
 ///
 /// Returns an error if the conversion fails.
 ///
-pub fn convert<T>(config: &T) -> anyhow::Result<()>
+pub fn convert<T>(config: &T) -> Result<(), WebPError>
 where
     T: InputOutput + Dimensions,
 {
-    Ok(webp::optimize(config)?)
+    webp::optimize(config)
 }
 
 #[cfg(test)]
