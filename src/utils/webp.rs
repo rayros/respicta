@@ -170,6 +170,10 @@ where
 
     let contents = rgba_to_webp(&rgba_image, &new_dimensions).map_err(WebPError::LibWebPError)?;
 
+    if let Some(parent) = config.output_path().parent() {
+        std::fs::create_dir_all(parent).map_err(WebPError::Io)?;
+    }
+
     std::fs::write(config.output_path(), contents).map_err(WebPError::Io)?;
 
     Ok(())

@@ -40,7 +40,6 @@ mod tests {
         let app = app();
         let server = TestServer::new(app).unwrap();
 
-        // test start server
         let response = server.get("/").await;
         assert_eq!(response.status_code(), StatusCode::METHOD_NOT_ALLOWED);
     }
@@ -52,12 +51,33 @@ mod tests {
 
         let app = Router::new().route("/", post(convert_method));
         let server = TestServer::new(app).unwrap();
-        // TODO: Fix aspect ratio command_server_test1.webp
+
         let response = server
             .post("/")
             .json(&serde_json::json!({
                 "input_path": "tests/files/command_server_test1.jpg",
                 "output_path": "target/command_server_test1.webp",
+                "width": 100,
+                "height": 100,
+            }))
+            .await;
+
+        assert_eq!(response.status_code(), StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn test_convert_nested_dir() {
+        use super::*;
+        use axum_test::TestServer;
+
+        let app = Router::new().route("/", post(convert_method));
+        let server = TestServer::new(app).unwrap();
+
+        let response = server
+            .post("/")
+            .json(&serde_json::json!({
+                "input_path": "tests/files/command_server_test1.jpg",
+                "output_path": "target/somedir/command_server_test1.webp",
                 "width": 100,
                 "height": 100,
             }))
