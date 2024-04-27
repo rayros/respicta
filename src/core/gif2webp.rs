@@ -3,11 +3,17 @@ use crate::{
     Config, Dimensions, InputOutput,
 };
 
+#[derive(Debug)]
+pub enum Error {
+    Gifsicle(gifsicle::Error),
+    Io(std::io::Error),
+}
+
 /// # Errors
 ///
 /// Returns an error if the gifsicle command fails or if the input file does not exist.
 ///
-pub fn convert<T>(config: &T) -> std::result::Result<(), std::io::Error>
+pub fn convert<T>(config: &T) -> Result<(), Error>
 where
     T: InputOutput + Dimensions,
 {
@@ -19,13 +25,13 @@ where
         width: config.width(),
         height: config.height(),
     };
-    gifsicle::optimize(&gifsicle_config)?;
+    gifsicle::optimize(&gifsicle_config).map_err(Error::Gifsicle)?;
     let webp_config = webp::GifConfig {
         input_path: step1_output_path,
         output_path: config.output_path(),
     };
-    webp::optimize_gif(&webp_config)?;
-    std::fs::remove_file(step1_output_path)?;
+    webp::optimize_gif(&webp_config).map_err(Error::Io)?;
+    std::fs::remove_file(step1_output_path).map_err(Error::Io)?;
     Ok(())
 }
 

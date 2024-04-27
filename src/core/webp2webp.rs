@@ -1,5 +1,5 @@
 use crate::{
-    utils::webp::{self, WebPError},
+    utils::webp::{self, Error},
     Dimensions, InputOutput,
 };
 
@@ -7,7 +7,7 @@ use crate::{
 ///
 /// Returns an error if the conversion fails.
 ///
-pub fn convert<T>(config: &T) -> Result<(), WebPError>
+pub fn convert<T>(config: &T) -> Result<(), Error>
 where
     T: InputOutput + Dimensions,
 {

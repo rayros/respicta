@@ -1,23 +1,6 @@
-use std::path::PathBuf;
-
 use oxipng::{Options, OutFile};
 
 use crate::InputOutput;
-
-pub struct Config<'a> {
-    pub input_path: &'a PathBuf,
-    pub output_path: &'a PathBuf,
-}
-
-impl InputOutput for Config<'_> {
-    fn input_path(&self) -> &PathBuf {
-        self.input_path
-    }
-
-    fn output_path(&self) -> &PathBuf {
-        self.output_path
-    }
-}
 
 /// # Errors
 ///
@@ -39,6 +22,8 @@ where
 
 #[cfg(test)]
 mod tests {
+    use crate::Config;
+
     #[test]
     fn oxipng_optimize() {
         use super::*;
@@ -46,6 +31,8 @@ mod tests {
         optimize(&Config {
             input_path: &"tests/files/issue-159.png".into(),
             output_path: &"target/issue-159.png".into(),
+            width: None,
+            height: None,
         })
         .unwrap();
     }

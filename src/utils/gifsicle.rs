@@ -13,17 +13,21 @@ where
     if let Some(height) = config.height() {
         result = format!("{result} --resize-height {height}");
     }
-    result = format!("{result} {input_path}");
-    result
+    format!("{result} {input_path}")
 }
 
-fn process_exit_code(code: Option<i32>) -> std::result::Result<(), std::io::Error> {
+#[derive(Debug)]
+pub enum Error {
+    Io(std::io::Error),
+    Exit(i32),
+    Signal,
+}
+
+fn process_exit_code(code: Option<i32>) -> Result<(), Error> {
     match code {
         Some(0) => Ok(()),
-        Some(_) | None => Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            "gifsicle failed",
-        )),
+        Some(code) => Err(Error::Exit(code)),
+        None => Err(Error::Signal),
     }
 }
 
@@ -31,7 +35,7 @@ fn process_exit_code(code: Option<i32>) -> std::result::Result<(), std::io::Erro
 ///
 /// Returns an error if the gifsicle command fails.
 ///
-pub fn optimize<T>(config: &T) -> std::result::Result<(), std::io::Error>
+pub fn optimize<T>(config: &T) -> Result<(), Error>
 where
     T: InputOutput + Dimensions,
 {
@@ -40,7 +44,8 @@ where
     let output = std::process::Command::new("sh")
         .arg("-c")
         .arg(command)
-        .output()?;
+        .output()
+        .map_err(Error::Io)?;
 
     println!("status: {}", output.status);
     println!("stdout: {}", String::from_utf8_lossy(&output.stdout));

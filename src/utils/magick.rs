@@ -16,6 +16,7 @@ pub struct Config<'a> {
 ///
 /// Returns an error if the optimization fails.
 ///
+/// TODO: use where InputOutput + Dimensions
 pub fn optimize(config: &Config) -> Result<(), magick_rust::MagickError> {
     START.call_once(|| {
         magick_wand_genesis();

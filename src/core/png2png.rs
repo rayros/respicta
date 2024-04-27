@@ -2,7 +2,7 @@ use std::error::Error;
 
 use crate::utils::{magick, oxipng};
 
-use crate::{Dimensions, InputOutput};
+use crate::{Config, Dimensions, InputOutput};
 
 /// # Errors
 ///
@@ -21,9 +21,13 @@ where
         height: config.height(),
     };
     magick::optimize(&magick_config)?;
-    let oxipng_config = oxipng::Config {
+    // TODO create struct PathIO implementing InputOutput
+    // TODO rename trait InputOutput to PathAccessor
+    let oxipng_config = Config {
         input_path: step1_output_path,
         output_path: config.output_path(),
+        width: None,
+        height: None,
     };
     oxipng::optimize(&oxipng_config)?;
     std::fs::remove_file(step1_output_path)?;
@@ -33,7 +37,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::Config;
 
     #[test]
     fn png2png_test1() {

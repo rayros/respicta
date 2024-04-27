@@ -1,9 +1,12 @@
-use image::io::Reader;
-use std::path::PathBuf;
+use std::{
+    fs::{create_dir_all, write},
+    path::PathBuf,
+    process::Command,
+};
 use thiserror::Error;
 
 use crate::{Dimensions, InputOutput};
-use image::GenericImageView;
+use image::{io::Reader, GenericImageView};
 use libwebp_sys::{
     VP8StatusCode, WebPConfig, WebPEncode, WebPEncodingError, WebPMemoryWrite, WebPMemoryWriter,
     WebPMemoryWriterClear, WebPMemoryWriterInit, WebPPicture, WebPPictureFree,
@@ -129,7 +132,7 @@ fn fit(width: u32, height: u32, max_width: u32, max_height: u32) -> (u32, u32) {
 }
 
 #[derive(Debug, Error)]
-pub enum WebPError {
+pub enum Error {
     #[error(transparent)]
     Io(#[from] std::io::Error),
     #[error(transparent)]
@@ -144,20 +147,20 @@ pub enum WebPError {
 ///
 /// Returns an error if the optimization fails.
 ///
-pub fn optimize<T>(config: &T) -> Result<(), WebPError>
+pub fn optimize<T>(config: &T) -> Result<(), Error>
 where
     T: InputOutput + Dimensions,
 {
     let input_image = Reader::open(config.input_path())
-        .map_err(WebPError::Io)?
+        .map_err(Error::Io)?
         .with_guessed_format()
-        .map_err(WebPError::Io)?
+        .map_err(Error::Io)?
         .decode()
-        .map_err(WebPError::Image)?;
+        .map_err(Error::Image)?;
 
     let dimensions = input_image.dimensions();
-    let dimension_width = i32::try_from(dimensions.0).map_err(WebPError::TryFromIntError)?;
-    let dimension_height = i32::try_from(dimensions.1).map_err(WebPError::TryFromIntError)?;
+    let dimension_width = i32::try_from(dimensions.0).map_err(Error::TryFromIntError)?;
+    let dimension_height = i32::try_from(dimensions.1).map_err(Error::TryFromIntError)?;
     let rgba_image = input_image.into_rgba8();
 
     let rgba_image = RGBAImage {
@@ -168,13 +171,13 @@ where
 
     let new_dimensions = NewDimensions::fit_dimensions(&rgba_image, config);
 
-    let contents = rgba_to_webp(&rgba_image, &new_dimensions).map_err(WebPError::LibWebPError)?;
+    let contents = rgba_to_webp(&rgba_image, &new_dimensions).map_err(Error::LibWebPError)?;
 
     if let Some(parent) = config.output_path().parent() {
-        std::fs::create_dir_all(parent).map_err(WebPError::Io)?;
+        create_dir_all(parent).map_err(Error::Io)?;
     }
 
-    std::fs::write(config.output_path(), contents).map_err(WebPError::Io)?;
+    write(config.output_path(), contents).map_err(Error::Io)?;
 
     Ok(())
 }
@@ -194,14 +197,12 @@ fn process_exit_code(code: Option<i32>) -> std::result::Result<(), std::io::Erro
     }
 }
 
-pub fn optimize_gif(config: &GifConfig) -> std::result::Result<(), std::io::Error> {
+// TODO: where INputOutput + Dimensions
+pub fn optimize_gif(config: &GifConfig) -> Result<(), std::io::Error> {
     let input_path = config.input_path.display();
     let output_path = config.output_path.display();
-    let command = format!("gif2webp -o {output_path} -q 75 -m 6 -mt -v {input_path}",);
-    let output = std::process::Command::new("sh")
-        .arg("-c")
-        .arg(command)
-        .output()?;
+    let command = format!("gif2webp -o {output_path} -q 75 -m 6 -mt -v {input_path}");
+    let output = Command::new("sh").arg("-c").arg(command).output()?;
     println!("status: {}", output.status);
     println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
     println!("stderr: {}", String::from_utf8_lossy(&output.stderr));

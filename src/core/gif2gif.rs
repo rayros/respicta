@@ -1,10 +1,13 @@
-use crate::{utils::gifsicle, Dimensions, InputOutput};
+use crate::{
+    utils::gifsicle::{self, Error},
+    Dimensions, InputOutput,
+};
 
 /// # Errors
 ///
 /// Returns an error if the conversion fails.
 ///
-pub fn convert<T>(config: &T) -> std::result::Result<(), std::io::Error>
+pub fn convert<T>(config: &T) -> std::result::Result<(), Error>
 where
     T: InputOutput + Dimensions,
 {
