@@ -100,7 +100,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "Custom { kind: Other, error: \"gifsicle failed\" }"]
+    #[should_panic = "Exit(1)"]
     fn gifsicle_panic() {
         use super::*;
 
@@ -114,7 +114,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "Custom { kind: Other, error: \"gifsicle failed\" }"]
+    #[should_panic = "Signal"]
     fn process_exit_code_terminated_by_signal_panic() {
         use super::*;
 

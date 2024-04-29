@@ -32,7 +32,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "Custom { kind: Other, error: \"gifsicle failed\" }"]
+    #[should_panic = "Exit(1)"]
     fn gif2gif_panic() {
         use super::*;
 

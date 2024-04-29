@@ -1,42 +1,47 @@
-use std::error::Error;
+use crate::utils;
 
-use crate::utils::{magick, oxipng};
+use crate::{Dimensions, InputOutput};
 
-use crate::{Config, Dimensions, InputOutput};
+use super::PathIO;
+
+#[derive(Debug)]
+pub enum Error {
+    Magick(magick_rust::MagickError),
+    Oxipng(oxipng::PngError),
+    Io(std::io::Error),
+}
 
 /// # Errors
 ///
 /// Returns an error if the conversion fails.
 ///
-pub fn convert<T>(config: &T) -> Result<(), Box<dyn Error>>
+pub fn convert<T>(config: &T) -> Result<(), Error>
 where
     T: InputOutput + Dimensions,
 {
     let output_path = config.output_path();
     let step1_output_path = &output_path.with_extension("step1.png");
-    let magick_config = magick::Config {
+    let magick_config = utils::magick::Config {
         input_path: config.input_path(),
         output_path: step1_output_path,
         width: config.width(),
         height: config.height(),
     };
-    magick::optimize(&magick_config)?;
-    // TODO create struct PathIO implementing InputOutput
+    utils::magick::optimize(&magick_config).map_err(Error::Magick)?;
     // TODO rename trait InputOutput to PathAccessor
-    let oxipng_config = Config {
+    let oxipng_config = PathIO {
         input_path: step1_output_path,
         output_path: config.output_path(),
-        width: None,
-        height: None,
     };
-    oxipng::optimize(&oxipng_config)?;
-    std::fs::remove_file(step1_output_path)?;
+    utils::oxipng::optimize(&oxipng_config).map_err(Error::Oxipng)?;
+    std::fs::remove_file(step1_output_path).map_err(Error::Io)?;
 
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::Config;
 
     #[test]
     fn png2png_test1() {
@@ -65,7 +70,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "MagickError(\"failed to read image\")"]
+    #[should_panic = "Magick(MagickError(\"failed to read image\"))"]
     fn png2png_panic() {
         use super::*;
 
