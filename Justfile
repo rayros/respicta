@@ -1,3 +1,6 @@
+test:
+  cargo test --all-features
+
 coverage: coverage-build coverage-lcov coverage-html
 
 coverage-build:
