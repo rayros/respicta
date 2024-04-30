@@ -3,6 +3,8 @@ use crate::{
     Config, Dimensions, InputOutput,
 };
 
+use super::PathIO;
+
 #[derive(Debug)]
 pub enum Error {
     Gifsicle(gifsicle::Error),
@@ -26,10 +28,7 @@ where
         height: config.height(),
     };
     gifsicle::optimize(&gifsicle_config).map_err(Error::Gifsicle)?;
-    let webp_config = webp::GifConfig {
-        input_path: step1_output_path,
-        output_path: config.output_path(),
-    };
+    let webp_config = PathIO::new(step1_output_path, config.output_path());
     webp::optimize_gif(&webp_config).map_err(Error::Io)?;
     std::fs::remove_file(step1_output_path).map_err(Error::Io)?;
     Ok(())
