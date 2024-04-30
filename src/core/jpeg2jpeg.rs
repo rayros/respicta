@@ -1,4 +1,4 @@
-use crate::{utils::magick, Dimensions, InputOutput};
+use crate::{utils::magick, Config, Dimensions, InputOutput};
 
 /// # Errors
 ///
@@ -8,7 +8,7 @@ pub fn convert<T>(config: &T) -> std::result::Result<(), magick_rust::MagickErro
 where
     T: InputOutput + Dimensions,
 {
-    magick::optimize(&magick::Config {
+    magick::optimize(&Config {
         input_path: config.input_path(),
         output_path: config.output_path(),
         width: config.width(),
@@ -18,7 +18,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::Config;
 
     #[test]
     fn jpeg2jpeg() {
