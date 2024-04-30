@@ -1,32 +1,31 @@
 #![allow(clippy::cast_precision_loss)]
 
 use magick_rust::{magick_wand_genesis, MagickWand};
-use std::{path::PathBuf, sync::Once};
+use std::sync::Once;
+
+use crate::{Dimensions, InputOutput};
 
 static START: Once = Once::new();
-
-pub struct Config<'a> {
-    pub input_path: &'a PathBuf,
-    pub output_path: &'a PathBuf,
-    pub width: Option<u32>,
-    pub height: Option<u32>,
-}
 
 /// # Errors
 ///
 /// Returns an error if the optimization fails.
 ///
-/// TODO: use where InputOutput + Dimensions
-pub fn optimize(config: &Config) -> Result<(), magick_rust::MagickError> {
+pub fn optimize<T>(config: &T) -> Result<(), magick_rust::MagickError>
+where
+    T: InputOutput + Dimensions,
+{
     START.call_once(|| {
         magick_wand_genesis();
     });
     let mut wand = MagickWand::new();
-    wand.read_image(&config.input_path.display().to_string())?;
+    wand.read_image(&config.input_path().display().to_string())?;
 
-    let width = config.width.map_or(wand.get_image_width(), |s| s as usize);
+    let width = config
+        .width()
+        .map_or(wand.get_image_width(), |s| s as usize);
     let height = config
-        .height
+        .height()
         .map_or(wand.get_image_height(), |s| s as usize);
 
     wand.auto_orient();
@@ -53,11 +52,15 @@ pub fn optimize(config: &Config) -> Result<(), magick_rust::MagickError> {
 
     wand.set_image_compression_quality(75)?;
 
-    wand.write_image(&config.output_path.display().to_string())
+    wand.write_image(&config.output_path().display().to_string())
 }
 
 #[cfg(test)]
 mod tests {
+    use std::path::PathBuf;
+
+    use crate::Config;
+
     #[test]
     fn magic_resize_and_auto_orient() -> Result<(), magick_rust::MagickError> {
         use super::*;

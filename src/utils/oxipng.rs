@@ -11,7 +11,7 @@ where
     T: InputOutput,
 {
     let input = &config.input_path().into();
-    let output = &OutFile::from_path(config.output_path().clone());
+    let output = &OutFile::from_path(config.output_path().into());
     let options = &Options {
         strip: oxipng::StripChunks::Safe, // Optionally, strip metadata
         ..Options::default()

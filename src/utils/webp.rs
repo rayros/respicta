@@ -1,6 +1,5 @@
 use std::{
     fs::{create_dir_all, write},
-    path::PathBuf,
     process::Command,
 };
 use thiserror::Error;
@@ -182,11 +181,6 @@ where
     Ok(())
 }
 
-pub struct GifConfig<'a> {
-    pub input_path: &'a PathBuf,
-    pub output_path: &'a PathBuf,
-}
-
 fn process_exit_code(code: Option<i32>) -> std::result::Result<(), std::io::Error> {
     match code {
         Some(0) => Ok(()),
@@ -197,10 +191,12 @@ fn process_exit_code(code: Option<i32>) -> std::result::Result<(), std::io::Erro
     }
 }
 
-// TODO: where INputOutput + Dimensions
-pub fn optimize_gif(config: &GifConfig) -> Result<(), std::io::Error> {
-    let input_path = config.input_path.display();
-    let output_path = config.output_path.display();
+pub fn optimize_gif<T>(config: &T) -> Result<(), std::io::Error>
+where
+    T: InputOutput,
+{
+    let input_path = config.input_path().display();
+    let output_path = config.output_path().display();
     let command = format!("gif2webp -o {output_path} -q 75 -m 6 -mt -v {input_path}");
     let output = Command::new("sh").arg("-c").arg(command).output()?;
     println!("status: {}", output.status);
@@ -214,7 +210,7 @@ pub fn optimize_gif(config: &GifConfig) -> Result<(), std::io::Error> {
 
 #[cfg(test)]
 mod tests {
-    use crate::Config;
+    use crate::{core::PathIO, Config};
 
     #[test]
     fn webp_optimize_png_to_webp() {
@@ -246,10 +242,10 @@ mod tests {
     fn webp_optimize_gif_to_webp_2() {
         use super::*;
 
-        optimize_gif(&GifConfig {
-            input_path: &"tests/files/test1.gif".into(),
-            output_path: &"target/webp_gif_test1.webp".into(),
-        })
+        optimize_gif(&PathIO::new(
+            &"tests/files/test1.gif".into(),
+            &"target/webp_gif_test1.webp".into(),
+        ))
         .unwrap();
     }
 
@@ -258,10 +254,10 @@ mod tests {
     fn webp_optimize_gif_to_webp_panic() {
         use super::*;
 
-        optimize_gif(&GifConfig {
-            input_path: &"tests/files/not_existing.gif".into(),
-            output_path: &"target/webp_gif_test1.webp".into(),
-        })
+        optimize_gif(&PathIO::new(
+            &"tests/files/not_existing.gif".into(),
+            &"target/webp_gif_test1.webp".into(),
+        ))
         .unwrap();
     }
 

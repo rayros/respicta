@@ -1,4 +1,4 @@
-use crate::utils;
+use crate::{utils, Config};
 
 use crate::{Dimensions, InputOutput};
 
@@ -21,7 +21,7 @@ where
 {
     let output_path = config.output_path();
     let step1_output_path = &output_path.with_extension("step1.png");
-    let magick_config = utils::magick::Config {
+    let magick_config = Config {
         input_path: config.input_path(),
         output_path: step1_output_path,
         width: config.width(),
@@ -29,10 +29,7 @@ where
     };
     utils::magick::optimize(&magick_config).map_err(Error::Magick)?;
     // TODO rename trait InputOutput to PathAccessor
-    let oxipng_config = PathIO {
-        input_path: step1_output_path,
-        output_path: config.output_path(),
-    };
+    let oxipng_config = PathIO::new(step1_output_path, config.output_path());
     utils::oxipng::optimize(&oxipng_config).map_err(Error::Oxipng)?;
     std::fs::remove_file(step1_output_path).map_err(Error::Io)?;
 
@@ -41,7 +38,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::Config;
 
     #[test]
     fn png2png_test1() {
