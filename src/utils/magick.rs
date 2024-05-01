@@ -5,6 +5,8 @@ use std::sync::Once;
 
 use crate::{Dimensions, InputOutput};
 
+use super::fit;
+
 static START: Once = Once::new();
 
 /// # Errors
@@ -31,24 +33,14 @@ where
     wand.auto_orient();
     wand.strip_image()?;
 
-    // TODO use fit used in webp.rs
-    let mut width_ratio = width as f64;
-    width_ratio /= wand.get_image_width() as f64;
-    let mut height_ratio = height as f64;
-    height_ratio /= wand.get_image_height() as f64;
-    let (new_width, new_height) = if width_ratio < height_ratio {
-        (
-            width,
-            (wand.get_image_height() as f64 * width_ratio) as usize,
-        )
-    } else {
-        (
-            (wand.get_image_width() as f64 * height_ratio) as usize,
-            height,
-        )
-    };
+    let (new_width, new_height) = fit(
+        wand.get_image_width() as u32,
+        wand.get_image_height() as u32,
+        width as u32,
+        height as u32,
+    );
 
-    wand.adaptive_resize_image(new_width, new_height)?;
+    wand.adaptive_resize_image(new_width as usize, new_height as usize)?;
 
     wand.set_image_compression_quality(75)?;
 

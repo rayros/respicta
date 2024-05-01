@@ -12,6 +12,8 @@ use libwebp_sys::{
     WebPPictureImportRGBA, WebPPictureRescale, WebPValidateConfig,
 };
 
+use super::fit;
+
 pub struct RGBAImage {
     pub data: *const u8,
     pub width: i32,
@@ -116,17 +118,6 @@ where
         WebPMemoryWriterClear(memory_writer_ptr);
 
         Ok(contents)
-    }
-}
-
-fn fit(width: u32, height: u32, max_width: u32, max_height: u32) -> (u32, u32) {
-    let width_ratio = f64::from(max_width) / f64::from(width);
-    let height_ratio = f64::from(max_height) / f64::from(height);
-
-    if width_ratio < height_ratio {
-        (max_width, (f64::from(height) * width_ratio) as u32)
-    } else {
-        ((f64::from(width) * height_ratio) as u32, max_height)
     }
 }
 
