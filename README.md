@@ -68,6 +68,8 @@ Options:
   -h, --help               Print help
 ```
 
+<!-- TODO: Add node.js example of use -->
+
 ### Command-server - send cli commands via http
 
 ```plaintext
@@ -79,6 +81,8 @@ Options:
   -a, --address <ADDRESS>  Address to bind the server (default: 0.0.0.0:3000)
   -h, --help               Print help
 ```
+
+<!-- TODO: Add node.js example of use -->
 
 # As a library
 
@@ -130,6 +134,7 @@ spec:
               value: http://localhost:4000
 ```
 
+<!-- TODO Add kubernetes config example for command-server -->
 
 ---
 
