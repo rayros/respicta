@@ -15,6 +15,7 @@ async fn convert_method(
     headers: HeaderMap,
     mut multipart: Multipart,
 ) -> Result<Response, AppError> {
+    // TODO: Use query parameters instead of headers
     let extension_header = headers.get("extension");
     let output_extension = extension_header
         .and_then(|ext| ext.to_str().ok())
