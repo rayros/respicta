@@ -10,7 +10,7 @@ pub mod utils;
 
 use core::{gif2gif, gif2webp, jpeg2jpeg, jpeg2webp, png2jpeg, png2png, png2webp, webp2webp};
 use extensions::{GIF, JFIF, JPEG, JPG, PNG, WEBP};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub trait PathAccessor {
     fn input_path(&self) -> &PathBuf;
@@ -22,24 +22,40 @@ pub trait Dimensions {
     fn height(&self) -> Option<u32>;
 }
 
-pub struct Config<'a> {
-    pub input_path: &'a PathBuf,
-    pub output_path: &'a PathBuf,
+pub struct Config {
+    pub input_path: PathBuf,
+    pub output_path: PathBuf,
     pub width: Option<u32>,
     pub height: Option<u32>,
 }
 
-impl PathAccessor for Config<'_> {
-    fn input_path(&self) -> &PathBuf {
-        self.input_path
-    }
-
-    fn output_path(&self) -> &PathBuf {
-        self.output_path
+impl Config {
+    pub fn new(
+        input_path: impl AsRef<Path>,
+        output_path: impl AsRef<Path>,
+        width: Option<u32>,
+        height: Option<u32>,
+    ) -> Config {
+        Config {
+            input_path: input_path.as_ref().to_path_buf(),
+            output_path: output_path.as_ref().to_path_buf(),
+            width,
+            height,
+        }
     }
 }
 
-impl Dimensions for Config<'_> {
+impl PathAccessor for Config {
+    fn input_path(&self) -> &PathBuf {
+        &self.input_path
+    }
+
+    fn output_path(&self) -> &PathBuf {
+        &self.output_path
+    }
+}
+
+impl Dimensions for Config {
     fn width(&self) -> Option<u32> {
         self.width
     }
@@ -105,12 +121,7 @@ mod tests {
     fn config() {
         use super::*;
 
-        let config = Config {
-            input_path: &"tests/files/test1.jpg".into(),
-            output_path: &"target/test1.jpg".into(),
-            width: Some(100),
-            height: None,
-        };
+        let config = Config::new("tests/files/test1.jpg", "target/test1.jpg", Some(100), None);
 
         assert_eq!(config.input_path(), &PathBuf::from("tests/files/test1.jpg"));
         assert_eq!(config.output_path(), &PathBuf::from("target/test1.jpg"));
@@ -122,47 +133,47 @@ mod tests {
     fn convert() -> anyhow::Result<()> {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/orientation_test.jpg".into(),
-            output_path: &"target/convert_test1.webp".into(),
-            width: Some(100),
-            height: None,
-        })?;
+        convert(&Config::new(
+            "tests/files/orientation_test.jpg",
+            "target/convert_test1.webp",
+            Some(100),
+            None,
+        ))?;
 
-        convert(&Config {
-            input_path: &"tests/files/orientation_test.jpeg".into(),
-            output_path: &"target/convert_test2.webp".into(),
-            width: Some(100),
-            height: None,
-        })?;
+        convert(&Config::new(
+            "tests/files/orientation_test.jpeg",
+            "target/convert_test2.webp",
+            Some(100),
+            None,
+        ))?;
 
-        convert(&Config {
-            input_path: &"tests/files/convert_test1.png".into(),
-            output_path: &"target/convert_test3.webp".into(),
-            width: None,
-            height: None,
-        })?;
+        convert(&Config::new(
+            "tests/files/convert_test1.png",
+            "target/convert_test3.webp",
+            None,
+            None,
+        ))?;
 
-        convert(&Config {
-            input_path: &"tests/files/convert_test1.png".into(),
-            output_path: &"target/convert_test4.webp".into(),
-            width: Some(10),
-            height: None,
-        })?;
+        convert(&Config::new(
+            "tests/files/convert_test1.png",
+            "target/convert_test4.webp",
+            Some(10),
+            None,
+        ))?;
 
-        convert(&Config {
-            input_path: &"tests/files/convert_test1.png".into(),
-            output_path: &"target/convert_test5.webp".into(),
-            width: None,
-            height: Some(10),
-        })?;
+        convert(&Config::new(
+            "tests/files/convert_test1.png",
+            "target/convert_test5.webp",
+            None,
+            Some(10),
+        ))?;
 
-        convert(&Config {
-            input_path: &"tests/files/convert_test1.gif".into(),
-            output_path: &"target/convert_test6.gif".into(),
-            width: Some(10),
-            height: Some(10),
-        })?;
+        convert(&Config::new(
+            "tests/files/convert_test1.gif",
+            "target/convert_test6.gif",
+            Some(10),
+            Some(10),
+        ))?;
 
         Ok(())
     }
@@ -171,12 +182,12 @@ mod tests {
     fn convert_jfif_to_webp() -> anyhow::Result<()> {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/convert_test_jfif.jfif".into(),
-            output_path: &"target/convert_test7.webp".into(),
-            width: Some(500),
-            height: None,
-        })?;
+        convert(&Config::new(
+            "tests/files/convert_test_jfif.jfif",
+            "target/convert_test7.webp",
+            Some(500),
+            None,
+        ))?;
 
         Ok(())
     }
@@ -185,12 +196,12 @@ mod tests {
     fn survive_extension_wrong_format_jpg_to_webp() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/convert_test2.jpg".into(),
-            output_path: &"target/convert_test8.webp".into(),
-            width: Some(500),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/convert_test2.jpg",
+            "target/convert_test8.webp",
+            Some(500),
+            None,
+        ))
         .unwrap();
     }
 
@@ -198,12 +209,12 @@ mod tests {
     fn extension_in_uppercase() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/convert_test1.JPG".into(),
-            output_path: &"target/convert_test1.webp".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/convert_test1.JPG",
+            "target/convert_test1.webp",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 
@@ -212,12 +223,12 @@ mod tests {
     fn convert_panic() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/not_existing.jpg".into(),
-            output_path: &"target/test1.tiff".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/not_existing.jpg",
+            "target/test1.tiff",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 
@@ -226,12 +237,12 @@ mod tests {
     fn convert_panic_jpg_to_webp() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/not_existing.jpg".into(),
-            output_path: &"target/test1.webp".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/not_existing.jpg",
+            "target/test1.webp",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 
@@ -240,12 +251,12 @@ mod tests {
     fn convert_panic_jpg_to_jpg() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/not_existing.jpg".into(),
-            output_path: &"target/test1.jpg".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/not_existing.jpg",
+            "target/test1.jpg",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 
@@ -254,12 +265,12 @@ mod tests {
     fn convert_panic_png_to_png() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/not_existing.png".into(),
-            output_path: &"target/test1.png".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/not_existing.png",
+            "target/test1.png",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 
@@ -268,12 +279,12 @@ mod tests {
     fn convert_panic_webp_to_webp() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/not_existing.webp".into(),
-            output_path: &"target/test1.webp".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/not_existing.webp",
+            "target/test1.webp",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 
@@ -282,12 +293,12 @@ mod tests {
     fn convert_panic_no_input_extension() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/not_existing".into(),
-            output_path: &"target/test1.webp".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/not_existing",
+            "target/test1.webp",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 
@@ -296,12 +307,12 @@ mod tests {
     fn convert_panic_no_output_extension() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/not_existing.jpg".into(),
-            output_path: &"target/test1".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/not_existing.jpg",
+            "target/test1",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 
@@ -310,12 +321,12 @@ mod tests {
     fn convert_panic_gif_to_gif() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/not_existing.gif".into(),
-            output_path: &"target/test1.gif".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/not_existing.gif",
+            "target/test1.gif",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 
@@ -324,12 +335,12 @@ mod tests {
     fn convert_panic_gif_to_webp() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/not_existing.gif".into(),
-            output_path: &"target/test1.webp".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/not_existing.gif",
+            "target/test1.webp",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 
@@ -338,12 +349,12 @@ mod tests {
     fn convert_panic_png_to_webp() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/not_existing.png".into(),
-            output_path: &"target/test1.webp".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/not_existing.png",
+            "target/test1.webp",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 
@@ -352,12 +363,12 @@ mod tests {
     fn convert_panic_png_to_jpg() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/not_existing.png".into(),
-            output_path: &"target/test1.jpg".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/not_existing.png",
+            "target/test1.jpg",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 }

@@ -22,12 +22,12 @@ mod tests {
     fn webp2webp() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/webp2webp_test1.webp".into(),
-            output_path: &"target/webp2webp_test1.webp".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/webp2webp_test1.webp",
+            "target/webp2webp_test1.webp",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 }

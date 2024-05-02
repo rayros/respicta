@@ -28,12 +28,12 @@ mod tests {
     fn oxipng_optimize() {
         use super::*;
 
-        optimize(&Config {
-            input_path: &"tests/files/issue-159.png".into(),
-            output_path: &"target/issue-159.png".into(),
-            width: None,
-            height: None,
-        })
+        optimize(&Config::new(
+            "tests/files/issue-159.png",
+            "target/issue-159.png",
+            None,
+            None,
+        ))
         .unwrap();
     }
 }

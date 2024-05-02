@@ -1,34 +1,30 @@
-use crate::{utils::magick, Config, Dimensions, PathAccessor};
+use crate::{utils::magick, Dimensions, PathAccessor};
 
 /// # Errors
 ///
 /// Returns an error if the conversion fails.
 ///
-pub fn convert<T>(config: &T) -> std::result::Result<(), magick_rust::MagickError>
+pub fn convert<T>(config: &T) -> std::result::Result<(), magick::Error>
 where
     T: PathAccessor + Dimensions,
 {
-    magick::optimize(&Config {
-        input_path: config.input_path(),
-        output_path: config.output_path(),
-        width: config.width(),
-        height: config.height(),
-    })
+    magick::optimize(config)
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::Config;
 
     #[test]
     fn png2jpeg() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/png2jpeg_test1.png".into(),
-            output_path: &"target/png2jpeg_test1.jpeg".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/png2jpeg_test1.png",
+            "target/png2jpeg_test1.jpeg",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 }

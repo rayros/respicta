@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use crate::app_error::AppError;
 use crate::{convert, Config};
 use axum::{body::Body, http::StatusCode, response::Response, routing::post, Json, Router};
@@ -14,12 +12,12 @@ struct Command {
 }
 
 async fn convert_method(Json(payload): Json<Command>) -> Result<Response, AppError> {
-    convert(&Config {
-        input_path: &PathBuf::from(&payload.input_path),
-        output_path: &PathBuf::from(&payload.output_path),
-        width: payload.width,
-        height: payload.height,
-    })?;
+    convert(&Config::new(
+        payload.input_path,
+        payload.output_path,
+        payload.width,
+        payload.height,
+    ))?;
     let response = Response::builder()
         .status(StatusCode::OK)
         .body(Body::empty())?;
@@ -77,7 +75,7 @@ mod tests {
             .post("/")
             .json(&serde_json::json!({
                 "input_path": "tests/files/command_server_test1.jpg",
-                "output_path": "target/somedir/command_server_test1.webp",
+                "output_path": "target/command_server_nested/command_server_test1.webp",
                 "width": 100,
                 "height": 100,
             }))

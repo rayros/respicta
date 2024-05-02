@@ -207,12 +207,12 @@ mod tests {
     fn webp_optimize_png_to_webp() {
         use super::*;
 
-        optimize(&Config {
-            input_path: &"tests/files/issue-159.png".into(),
-            output_path: &"target/issue-159.webp".into(),
-            width: Some(100),
-            height: Some(100),
-        })
+        optimize(&Config::new(
+            "tests/files/issue-159.png",
+            "target/issue-159.webp",
+            Some(100),
+            Some(100),
+        ))
         .unwrap();
     }
 
@@ -220,12 +220,12 @@ mod tests {
     fn webp_optimize_gif_to_webp_static() {
         use super::*;
 
-        optimize(&Config {
-            input_path: &"tests/files/test1.gif".into(),
-            output_path: &"target/gif_test1_static.webp".into(),
-            width: Some(100),
-            height: Some(100),
-        })
+        optimize(&Config::new(
+            "tests/files/test1.gif",
+            "target/gif_test1_static.webp",
+            Some(100),
+            Some(100),
+        ))
         .unwrap();
     }
 

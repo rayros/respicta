@@ -22,12 +22,12 @@ mod tests {
     fn gif2gif() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/gif2gif_test1.gif".into(),
-            output_path: &"target/gif2gif_test1.gif".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/gif2gif_test1.gif",
+            "target/gif2gif_test1.gif",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 
@@ -36,12 +36,12 @@ mod tests {
     fn gif2gif_panic() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/gif2gif_notexisting_test1.gif".into(),
-            output_path: &"target/gif2gif_test1.gif".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/gif2gif_notexisting_test1.gif",
+            "target/gif2gif_test1.gif",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 }

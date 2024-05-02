@@ -35,12 +35,7 @@ async fn convert_method(
     let output_path = input_path.with_extension(output_extension);
     let data = field.bytes().await?;
     write(&input_path, &data).await?;
-    convert(&Config {
-        input_path: &input_path,
-        output_path: &output_path,
-        width,
-        height,
-    })?;
+    convert(&Config::new(&input_path, &output_path, width, height))?;
     let file_content = read(&output_path).await?;
     let body = Body::from(file_content);
     let response = Response::builder().status(StatusCode::OK).body(body)?;

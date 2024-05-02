@@ -21,12 +21,13 @@ where
 {
     let output_path = config.output_path();
     let step1_output_path = &output_path.with_extension("step1");
-    let gifsicle_config = Config {
-        input_path: config.input_path(),
-        output_path: step1_output_path,
-        width: config.width(),
-        height: config.height(),
-    };
+    let gifsicle_config = Config::new(
+        config.input_path(),
+        step1_output_path,
+        config.width(),
+        config.height(),
+    );
+
     gifsicle::optimize(&gifsicle_config).map_err(Error::Gifsicle)?;
     let webp_config = PathIO::new(step1_output_path, config.output_path());
     webp::optimize_gif(&webp_config).map_err(Error::Io)?;
@@ -41,12 +42,12 @@ mod tests {
     fn gif2webp() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/gif2webp_test1.gif".into(),
-            output_path: &"target/gif2webp_test1.webp".into(),
-            width: Some(100),
-            height: Some(100),
-        })
+        convert(&Config::new(
+            "tests/files/gif2webp_test1.gif",
+            "target/gif2webp_test1.webp",
+            Some(100),
+            Some(100),
+        ))
         .unwrap();
     }
 
@@ -55,12 +56,12 @@ mod tests {
     fn gif2webp_panic() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/gif2webp_notexisting_test1.gif".into(),
-            output_path: &"target/gif2webp_test1.webp".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/gif2webp_notexisting_test1.gif",
+            "target/gif2webp_test1.webp",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 }

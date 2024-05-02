@@ -118,13 +118,7 @@ async fn main() {
             width,
             height,
             ..
-        }) => convert(&Config {
-            input_path: &input_path,
-            output_path: &output_path,
-            width,
-            height,
-        })
-        .unwrap(),
+        }) => convert(&Config::new(input_path, output_path, width, height)).unwrap(),
         Some(Commands::Server { address, limit }) => {
             start_server(address, server::app(limit)).await.unwrap();
         }

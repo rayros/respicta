@@ -22,12 +22,12 @@ mod tests {
     fn png2webp() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/png2webp_test1.png".into(),
-            output_path: &"target/png2webp_test1.webp".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/png2webp_test1.png",
+            "target/png2webp_test1.webp",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 }

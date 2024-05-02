@@ -64,12 +64,12 @@ mod tests {
     fn gifsicle() {
         use super::*;
 
-        optimize(&Config {
-            input_path: &"tests/files/gifsicle_test1.gif".into(),
-            output_path: &"target/gifsicle_test1.gif".into(),
-            width: Some(100),
-            height: None,
-        })
+        optimize(&Config::new(
+            "tests/files/gifsicle_test1.gif",
+            "target/gifsicle_test1.gif",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 
@@ -77,12 +77,12 @@ mod tests {
     fn gifsicle_without_width() {
         use super::*;
 
-        optimize(&Config {
-            input_path: &"tests/files/gifsicle_test1.gif".into(),
-            output_path: &"target/gifsicle_without_width_test2.gif".into(),
-            width: None,
-            height: Some(100),
-        })
+        optimize(&Config::new(
+            "tests/files/gifsicle_test1.gif",
+            "target/gifsicle_without_width_test2.gif",
+            None,
+            Some(100),
+        ))
         .unwrap();
     }
 
@@ -90,12 +90,12 @@ mod tests {
     fn gifsicle_without_width_and_height() {
         use super::*;
 
-        optimize(&Config {
-            input_path: &"tests/files/gifsicle_test1.gif".into(),
-            output_path: &"target/gifsicle_without_width_and_height_test2.gif".into(),
-            width: None,
-            height: None,
-        })
+        optimize(&Config::new(
+            "tests/files/gifsicle_test1.gif",
+            "target/gifsicle_without_width_and_height_test2.gif",
+            None,
+            None,
+        ))
         .unwrap();
     }
 
@@ -104,12 +104,12 @@ mod tests {
     fn gifsicle_panic() {
         use super::*;
 
-        optimize(&Config {
-            input_path: &"tests/files/gifsicle_notexisting_test1.gif".into(),
-            output_path: &"target/gifsicle_test1.gif".into(),
-            width: Some(100),
-            height: None,
-        })
+        optimize(&Config::new(
+            "tests/files/gifsicle_notexisting_test1.gif",
+            "target/gifsicle_test1.gif",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 

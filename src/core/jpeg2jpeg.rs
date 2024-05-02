@@ -1,34 +1,30 @@
-use crate::{utils::magick, Config, Dimensions, PathAccessor};
+use crate::{utils::magick, Dimensions, PathAccessor};
 
 /// # Errors
 ///
 /// Returns an error if the conversion fails.
 ///
-pub fn convert<T>(config: &T) -> std::result::Result<(), magick_rust::MagickError>
+pub fn convert<T>(config: &T) -> std::result::Result<(), magick::Error>
 where
     T: PathAccessor + Dimensions,
 {
-    magick::optimize(&Config {
-        input_path: config.input_path(),
-        output_path: config.output_path(),
-        width: config.width(),
-        height: config.height(),
-    })
+    magick::optimize(config)
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::Config;
 
     #[test]
     fn jpeg2jpeg() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/jpeg2jpeg_test1.jpg".into(),
-            output_path: &"target/jpeg2jpeg_test1.jfif".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/jpeg2jpeg_test1.jpg",
+            "target/jpeg2jpeg_test1.jfif",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 
@@ -37,12 +33,12 @@ mod tests {
     fn jpeg2jpeg_panic() {
         use super::*;
 
-        convert(&Config {
-            input_path: &"tests/files/jpeg2jpeg_notexisting_test1.jpg".into(),
-            output_path: &"target/jpeg2jpeg_test1.jfif".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/jpeg2jpeg_notexisting_test1.jpg",
+            "target/jpeg2jpeg_test1.jfif",
+            Some(100),
+            None,
+        ))
         .unwrap();
     }
 }
