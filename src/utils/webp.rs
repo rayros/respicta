@@ -4,7 +4,7 @@ use std::{
 };
 use thiserror::Error;
 
-use crate::{Dimensions, InputOutput};
+use crate::{Dimensions, PathAccessor};
 use image::{io::Reader, GenericImageView};
 use libwebp_sys::{
     VP8StatusCode, WebPConfig, WebPEncode, WebPEncodingError, WebPMemoryWrite, WebPMemoryWriter,
@@ -139,7 +139,7 @@ pub enum Error {
 ///
 pub fn optimize<T>(config: &T) -> Result<(), Error>
 where
-    T: InputOutput + Dimensions,
+    T: PathAccessor + Dimensions,
 {
     let input_image = Reader::open(config.input_path())
         .map_err(Error::Io)?
@@ -184,7 +184,7 @@ fn process_exit_code(code: Option<i32>) -> std::result::Result<(), std::io::Erro
 
 pub fn optimize_gif<T>(config: &T) -> Result<(), std::io::Error>
 where
-    T: InputOutput,
+    T: PathAccessor,
 {
     let input_path = config.input_path().display();
     let output_path = config.output_path().display();

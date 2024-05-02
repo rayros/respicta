@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::InputOutput;
+use crate::PathAccessor;
 
 pub mod gif2gif;
 pub mod gif2webp;
@@ -26,7 +26,7 @@ impl<'a> PathIO<'a> {
     }
 }
 
-impl<'a> InputOutput for PathIO<'a> {
+impl<'a> PathAccessor for PathIO<'a> {
     fn input_path(&self) -> &PathBuf {
         self.input_path
     }

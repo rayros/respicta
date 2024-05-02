@@ -1,6 +1,6 @@
 use oxipng::{Options, OutFile};
 
-use crate::InputOutput;
+use crate::PathAccessor;
 
 /// # Errors
 ///
@@ -8,7 +8,7 @@ use crate::InputOutput;
 ///
 pub fn optimize<T>(config: &T) -> Result<(), oxipng::PngError>
 where
-    T: InputOutput,
+    T: PathAccessor,
 {
     let input = &config.input_path().into();
     let output = &OutFile::from_path(config.output_path().into());

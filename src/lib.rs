@@ -12,7 +12,7 @@ use core::{gif2gif, gif2webp, jpeg2jpeg, jpeg2webp, png2jpeg, png2png, png2webp,
 use extensions::{GIF, JFIF, JPEG, JPG, PNG, WEBP};
 use std::path::PathBuf;
 
-pub trait InputOutput {
+pub trait PathAccessor {
     fn input_path(&self) -> &PathBuf;
     fn output_path(&self) -> &PathBuf;
 }
@@ -29,7 +29,7 @@ pub struct Config<'a> {
     pub height: Option<u32>,
 }
 
-impl InputOutput for Config<'_> {
+impl PathAccessor for Config<'_> {
     fn input_path(&self) -> &PathBuf {
         self.input_path
     }

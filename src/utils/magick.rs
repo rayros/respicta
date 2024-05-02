@@ -3,7 +3,7 @@
 use magick_rust::{magick_wand_genesis, MagickWand};
 use std::sync::Once;
 
-use crate::{Dimensions, InputOutput};
+use crate::{Dimensions, PathAccessor};
 
 use super::fit;
 
@@ -15,7 +15,7 @@ static START: Once = Once::new();
 ///
 pub fn optimize<T>(config: &T) -> Result<(), magick_rust::MagickError>
 where
-    T: InputOutput + Dimensions,
+    T: PathAccessor + Dimensions,
 {
     START.call_once(|| {
         magick_wand_genesis();

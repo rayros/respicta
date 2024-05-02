@@ -1,6 +1,6 @@
 use crate::{
     utils::{gifsicle, webp},
-    Config, Dimensions, InputOutput,
+    Config, Dimensions, PathAccessor,
 };
 
 use super::PathIO;
@@ -17,7 +17,7 @@ pub enum Error {
 ///
 pub fn convert<T>(config: &T) -> Result<(), Error>
 where
-    T: InputOutput + Dimensions,
+    T: PathAccessor + Dimensions,
 {
     let output_path = config.output_path();
     let step1_output_path = &output_path.with_extension("step1");

@@ -1,6 +1,6 @@
 use crate::{utils, Config};
 
-use crate::{Dimensions, InputOutput};
+use crate::{Dimensions, PathAccessor};
 
 use super::PathIO;
 
@@ -17,7 +17,7 @@ pub enum Error {
 ///
 pub fn convert<T>(config: &T) -> Result<(), Error>
 where
-    T: InputOutput + Dimensions,
+    T: PathAccessor + Dimensions,
 {
     let output_path = config.output_path();
     let step1_output_path = &output_path.with_extension("step1.png");
@@ -28,7 +28,6 @@ where
         height: config.height(),
     };
     utils::magick::optimize(&magick_config).map_err(Error::Magick)?;
-    // TODO rename trait InputOutput to PathAccessor
     let oxipng_config = PathIO::new(step1_output_path, config.output_path());
     utils::oxipng::optimize(&oxipng_config).map_err(Error::Oxipng)?;
     std::fs::remove_file(step1_output_path).map_err(Error::Io)?;

@@ -1,6 +1,6 @@
 use crate::{
     utils::gifsicle::{self, Error},
-    Dimensions, InputOutput,
+    Dimensions, PathAccessor,
 };
 
 /// # Errors
@@ -9,7 +9,7 @@ use crate::{
 ///
 pub fn convert<T>(config: &T) -> std::result::Result<(), Error>
 where
-    T: InputOutput + Dimensions,
+    T: PathAccessor + Dimensions,
 {
     gifsicle::optimize(config)
 }

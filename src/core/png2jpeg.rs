@@ -1,4 +1,4 @@
-use crate::{utils::magick, Config, Dimensions, InputOutput};
+use crate::{utils::magick, Config, Dimensions, PathAccessor};
 
 /// # Errors
 ///
@@ -6,7 +6,7 @@ use crate::{utils::magick, Config, Dimensions, InputOutput};
 ///
 pub fn convert<T>(config: &T) -> std::result::Result<(), magick_rust::MagickError>
 where
-    T: InputOutput + Dimensions,
+    T: PathAccessor + Dimensions,
 {
     magick::optimize(&Config {
         input_path: config.input_path(),

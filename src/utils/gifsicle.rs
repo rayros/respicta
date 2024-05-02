@@ -1,8 +1,8 @@
-use crate::{Dimensions, InputOutput};
+use crate::{Dimensions, PathAccessor};
 
 fn to_args<T>(config: &T) -> String
 where
-    T: InputOutput + Dimensions,
+    T: PathAccessor + Dimensions,
 {
     let output_path = config.output_path().display();
     let input_path = config.input_path().display();
@@ -37,7 +37,7 @@ fn process_exit_code(code: Option<i32>) -> Result<(), Error> {
 ///
 pub fn optimize<T>(config: &T) -> Result<(), Error>
 where
-    T: InputOutput + Dimensions,
+    T: PathAccessor + Dimensions,
 {
     let args = to_args(config);
     let command = format!("gifsicle {args}");
