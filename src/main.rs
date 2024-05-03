@@ -62,6 +62,10 @@ mod cli {
         let listener = TcpListener::bind(address.clone()).await;
         match listener {
             Ok(listener) => {
+                let version = option_env!("CARGO_PKG_VERSION");
+                if let Some(version) = version {
+                    println!("Respicta v{version}");
+                }
                 println!("Server started at http://{address}");
                 axum::serve(listener, service)
                     .with_graceful_shutdown(shutdown_signal())
