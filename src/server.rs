@@ -1,33 +1,30 @@
 use crate::app_error::AppError;
 use crate::{convert, Config};
+use axum::extract::Query;
 use axum::{
     body::Body,
     extract::{DefaultBodyLimit, Multipart},
-    http::{header::HeaderMap, StatusCode},
+    http::StatusCode,
     response::Response,
     routing::post,
     Router,
 };
+use serde::Deserialize;
 use tempfile::tempdir;
 use tokio::fs::{read, write};
 
+#[derive(Deserialize)]
+struct Params {
+    extension: Option<String>,
+    width: Option<u32>,
+    height: Option<u32>,
+}
+
 async fn convert_method(
-    headers: HeaderMap,
+    params: Query<Params>,
     mut multipart: Multipart,
 ) -> Result<Response, AppError> {
-    // TODO: Use query parameters instead of headers
-    let extension_header = headers.get("extension");
-    let output_extension = extension_header
-        .and_then(|ext| ext.to_str().ok())
-        .unwrap_or("webp");
-    let width: Option<u32> = headers
-        .get("width")
-        .and_then(|width| width.to_str().ok())
-        .and_then(|width| width.parse().ok());
-    let height: Option<u32> = headers
-        .get("height")
-        .and_then(|height| height.to_str().ok())
-        .and_then(|height| height.parse().ok());
+    let output_extension = params.extension.clone().unwrap_or(String::from("webp"));
     let tempdir = tempdir()?;
     let field = multipart.next_field().await?.unwrap();
     let file_name = field.file_name().unwrap();
@@ -35,7 +32,12 @@ async fn convert_method(
     let output_path = input_path.with_extension(output_extension);
     let data = field.bytes().await?;
     write(&input_path, &data).await?;
-    convert(&Config::new(&input_path, &output_path, width, height))?;
+    convert(&Config::new(
+        &input_path,
+        &output_path,
+        params.width,
+        params.height,
+    ))?;
     let file_content = read(&output_path).await?;
     let body = Body::from(file_content);
     let response = Response::builder().status(StatusCode::OK).body(body)?;
@@ -119,4 +121,6 @@ mod tests {
             "Unsupported conversion: someunknownextension -> webp"
         );
     }
+
+    // TODO test extension, width, height
 }
