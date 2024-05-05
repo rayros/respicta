@@ -1,3 +1,9 @@
+server:
+  cargo run --features cli -- server
+
+command-server:
+  cargo run --features cli -- command-server
+
 test:
   cargo test --all-features
 

@@ -4,6 +4,18 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "command-server",
+            "type": "shell",
+            "command": "just command-server",
+            "problemMatcher": []
+        },
+        {
+            "label": "server",
+            "type": "shell",
+            "command": "just server",
+            "problemMatcher": []
+        },
+        {
             "label": "coverage",
             "type": "shell",
             "command": "just coverage",
