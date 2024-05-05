@@ -83,4 +83,24 @@ mod tests {
 
         assert_eq!(response.status_code(), StatusCode::OK);
     }
+
+    #[tokio::test]
+    async fn test_convert_wrong_named_webp_jpg_to_jpg() {
+        use super::*;
+        use axum_test::TestServer;
+
+        let app = Router::new().route("/", post(convert_method));
+        let server = TestServer::new(app).unwrap();
+
+        let response = server
+            .post("/")
+            .json(&serde_json::json!({
+                "input_path": "tests/files/webp/command_server_test2.jpg",
+                "output_path": "target/jpg/command_server_test2.jpg",
+                "width": 500,
+            }))
+            .await;
+
+        assert_eq!(response.status_code(), StatusCode::OK);
+    }
 }
