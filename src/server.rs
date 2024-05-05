@@ -9,12 +9,12 @@ use axum::{
     routing::post,
     Router,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use tempfile::tempdir;
 use tokio::fs::{read, write};
 
-#[derive(Deserialize)]
-struct Params {
+#[derive(Deserialize, Serialize)]
+pub struct Params {
     extension: Option<String>,
     width: Option<u32>,
     height: Option<u32>,
@@ -122,5 +122,28 @@ mod tests {
         );
     }
 
-    // TODO test extension, width, height
+    #[tokio::test]
+    async fn test_query_params() {
+        use super::*;
+        use axum_test::multipart::MultipartForm;
+        use axum_test::{multipart::Part, TestServer};
+
+        let app = Router::new().route("/", post(convert_method));
+        let server = TestServer::new(app).unwrap();
+        let image_bytes = include_bytes!("../tests/files/issue-159.png");
+        let image_part = Part::bytes(image_bytes.as_slice()).file_name("issue-159.png");
+
+        let multipart_form = MultipartForm::new().add_part("file", image_part);
+        let response = server
+            .post("/")
+            .add_query_params(Params {
+                extension: Some("jpeg".to_string()),
+                width: Some(100),
+                height: Some(100),
+            })
+            .multipart(multipart_form)
+            .await;
+
+        assert_eq!(response.status_code(), StatusCode::OK);
+    }
 }
