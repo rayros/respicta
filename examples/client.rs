@@ -11,7 +11,7 @@ async fn main() {
     );
     let response = reqwest::Client::new()
         .post("http://localhost:3000/")
-        .header("extension", "jpeg")
+        .query(&[("extension", "jpeg"), ("width", "100"), ("height", "100")])
         .multipart(multipart)
         .send()
         .await
