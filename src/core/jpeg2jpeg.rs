@@ -1,3 +1,5 @@
+use magick_rust::bindings::FilterType_LanczosFilter;
+
 use crate::{utils::magick, Dimensions, PathAccessor};
 
 /// # Errors
@@ -8,7 +10,7 @@ pub fn convert<T>(config: &T) -> std::result::Result<(), magick::Error>
 where
     T: PathAccessor + Dimensions,
 {
-    magick::optimize(config)
+    magick::optimize(config, Some(FilterType_LanczosFilter))
 }
 
 #[cfg(test)]

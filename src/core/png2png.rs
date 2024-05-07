@@ -28,7 +28,7 @@ where
         config.width(),
         config.height(),
     );
-    utils::magick::optimize(&magick_config).map_err(Error::Magick)?;
+    utils::magick::optimize(&magick_config, None).map_err(Error::Magick)?;
     let oxipng_config = PathIO::new(step1_output_path, config.output_path());
     utils::oxipng::optimize(&oxipng_config).map_err(Error::Oxipng)?;
     std::fs::remove_file(step1_output_path).map_err(Error::Io)?;

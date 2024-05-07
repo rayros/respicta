@@ -8,7 +8,7 @@ pub fn convert<T>(config: &T) -> std::result::Result<(), magick::Error>
 where
     T: PathAccessor + Dimensions,
 {
-    magick::optimize(config)
+    magick::optimize(config, None)
 }
 
 #[cfg(test)]
