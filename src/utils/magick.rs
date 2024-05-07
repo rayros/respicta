@@ -1,6 +1,6 @@
 #![allow(clippy::cast_precision_loss)]
 
-use magick_rust::{magick_wand_genesis, MagickWand};
+use magick_rust::{bindings::FilterType_LanczosFilter, magick_wand_genesis, MagickWand};
 use std::{fs::create_dir_all, sync::Once};
 
 use crate::{Dimensions, PathAccessor};
@@ -47,8 +47,11 @@ where
         height as u32,
     );
 
-    wand.adaptive_resize_image(new_width as usize, new_height as usize)
-        .map_err(Error::Magick)?;
+    wand.resize_image(
+        new_width as usize,
+        new_height as usize,
+        FilterType_LanczosFilter,
+    );
 
     wand.set_image_compression_quality(75)
         .map_err(Error::Magick)?;
