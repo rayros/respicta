@@ -11,6 +11,7 @@ pub mod utils;
 use core::{gif2gif, gif2webp, jpeg2jpeg, jpeg2webp, png2jpeg, png2png, png2webp, webp2webp};
 use extensions::{GIF, JFIF, JPEG, JPG, PNG, WEBP};
 use std::path::{Path, PathBuf};
+use utils::{gifsicle, magick, webp};
 
 pub trait PathAccessor {
     fn input_path(&self) -> &PathBuf;
@@ -65,6 +66,18 @@ impl Dimensions for Config {
     }
 }
 
+pub enum Error {
+    UnsupportedConversion(String, String),
+    Png2Png(png2png::Error),
+    Png2Jpeg(magick::Error),
+    Png2Webp(webp::Error),
+    Jpeg2Jpeg(magick::Error),
+    Jpeg2Webp(webp::Error),
+    Gif2Gif(gifsicle::Error),
+    Gif2Webp(gif2webp::Error),
+    Webp2Webp(webp::Error),
+}
+
 /// # Errors
 ///
 /// Returns an error if:
@@ -89,6 +102,7 @@ pub fn convert(config: &Config) -> anyhow::Result<()> {
     ) {
         (Some(input_extension), Some(output_extension)) => {
             match (input_extension.as_str(), output_extension.as_str()) {
+                // TODO replace anyhow with Error
                 (GIF, GIF) => gif2gif::convert(config)
                     .map_err(|e| anyhow::anyhow!("Error converting gif to gif: {:?}", e)),
                 (GIF, WEBP) => gif2webp::convert(config)
