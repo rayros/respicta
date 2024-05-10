@@ -1,3 +1,5 @@
+use thiserror::Error;
+
 use crate::{
     utils::{gifsicle, webp},
     Config, Dimensions, PathAccessor,
@@ -5,9 +7,11 @@ use crate::{
 
 use super::PathIO;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum Error {
+    #[error("Gifsicle({0})")]
     Gifsicle(gifsicle::Error),
+    #[error("Io({0})")]
     Io(std::io::Error),
 }
 

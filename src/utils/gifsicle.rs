@@ -1,3 +1,5 @@
+use thiserror::Error;
+
 use crate::{Dimensions, PathAccessor};
 
 fn to_args<T>(config: &T) -> String
@@ -16,10 +18,13 @@ where
     format!("{result} {input_path}")
 }
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum Error {
+    #[error("Io({0})")]
     Io(std::io::Error),
+    #[error("Exit({0})")]
     Exit(i32),
+    #[error("Signal")]
     Signal,
 }
 

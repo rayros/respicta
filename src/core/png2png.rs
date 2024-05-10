@@ -1,3 +1,5 @@
+use thiserror::Error;
+
 use crate::utils::magick;
 use crate::{utils, Config};
 
@@ -5,10 +7,13 @@ use crate::{Dimensions, PathAccessor};
 
 use super::PathIO;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum Error {
+    #[error("Magick({0})")]
     Magick(magick::Error),
+    #[error("Oxipng({0})")]
     Oxipng(oxipng::PngError),
+    #[error("Io({0})")]
     Io(std::io::Error),
 }
 

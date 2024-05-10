@@ -2,6 +2,7 @@
 
 use magick_rust::{magick_wand_genesis, MagickWand};
 use std::{fs::create_dir_all, sync::Once};
+use thiserror::Error;
 
 use crate::{Dimensions, PathAccessor};
 
@@ -9,9 +10,11 @@ use super::fit;
 
 static START: Once = Once::new();
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum Error {
+    #[error("Magick({0})")]
     Magick(magick_rust::MagickError),
+    #[error("Io({0})")]
     Io(std::io::Error),
 }
 
