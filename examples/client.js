@@ -14,7 +14,7 @@ fs.readFile(filePath, async (err, data) => {
     const blob = new Blob([data], { type: 'image/jpeg' });
 
     const formData = new FormData();
-    formData.append('file', blob, 'logo_small.jpeg');
+    formData.append('file', blob, 'logo.jpeg');
 
     const response = await fetch(url, {
         method: 'POST',
