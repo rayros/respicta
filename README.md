@@ -141,6 +141,12 @@ const run = async () => {
 run().catch(console.error);
 ```
 
+### Postman client
+
+### Postman client
+
+[<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://app.getpostman.com/run-collection/1281512-ce9f3b4a-5c85-49d0-b794-97999b48a0c7?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D1281512-ce9f3b4a-5c85-49d0-b794-97999b48a0c7%26entityType%3Dcollection%26workspaceId%3D1ee2b3bc-b936-48d7-b034-ff9b999f9ee5)
+
 # As a library
 
 ```rust
