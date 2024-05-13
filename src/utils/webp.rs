@@ -182,6 +182,10 @@ fn process_exit_code(code: Option<i32>) -> std::result::Result<(), std::io::Erro
     }
 }
 
+/// # Errors
+///
+/// Returns an error if the command gif2webp fails.
+///
 pub fn optimize_gif<T>(config: &T) -> Result<(), std::io::Error>
 where
     T: PathAccessor,
