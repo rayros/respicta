@@ -16,8 +16,8 @@ use super::fit;
 
 pub struct RGBAImage {
     pub data: *const u8,
-    pub width: i32,
-    pub height: i32,
+    pub width: u32,
+    pub height: u32,
 }
 
 pub struct NewDimensions {
@@ -41,10 +41,10 @@ impl NewDimensions {
         T: Dimensions,
     {
         let (new_width, new_height) = fit(
-            image.width as u32,
-            image.height as u32,
-            config.width().unwrap_or(image.width as u32),
-            config.height().unwrap_or(image.height as u32),
+            image.width,
+            image.height,
+            config.width().unwrap_or(image.width),
+            config.height().unwrap_or(image.height),
         );
 
         NewDimensions {
@@ -64,6 +64,8 @@ pub enum LibWebPError {
     Picture(()),
     #[error("Failed to encode WebP image: {0:?}")]
     Encoding(WebPEncodingError),
+    #[error(transparent)]
+    TryFromIntError(#[from] std::num::TryFromIntError),
 }
 
 fn rgba_to_webp<T>(image: &RGBAImage, config: &T) -> Result<Vec<u8>, LibWebPError>
@@ -77,8 +79,8 @@ where
 
     let mut picture = WebPPicture::new().map_err(LibWebPError::Picture)?;
     picture.use_argb = 1;
-    picture.width = image.width;
-    picture.height = image.height;
+    picture.width = i32::try_from(image.width).map_err(LibWebPError::TryFromIntError)?;
+    picture.height = i32::try_from(image.height).map_err(LibWebPError::TryFromIntError)?;
 
     let mut ww: ::core::mem::MaybeUninit<WebPMemoryWriter> = ::core::mem::MaybeUninit::uninit();
     picture.writer = Some(WebPMemoryWrite);
@@ -90,8 +92,12 @@ where
         }
 
         let memory_writer_ptr = ww.as_mut_ptr();
+
         WebPMemoryWriterInit(memory_writer_ptr);
-        WebPPictureImportRGBA(&mut picture, image.data, image.width * 4);
+
+        let rgba_stride = i32::try_from(image.width * 4).map_err(LibWebPError::TryFromIntError)?;
+
+        WebPPictureImportRGBA(&mut picture, image.data, rgba_stride);
 
         let target_width = config
             .width()
@@ -128,8 +134,6 @@ pub enum Error {
     #[error(transparent)]
     Image(#[from] image::ImageError),
     #[error(transparent)]
-    TryFromIntError(#[from] std::num::TryFromIntError),
-    #[error(transparent)]
     LibWebPError(#[from] LibWebPError),
 }
 
@@ -149,8 +153,8 @@ where
         .map_err(Error::Image)?;
 
     let dimensions = input_image.dimensions();
-    let dimension_width = i32::try_from(dimensions.0).map_err(Error::TryFromIntError)?;
-    let dimension_height = i32::try_from(dimensions.1).map_err(Error::TryFromIntError)?;
+    let dimension_width = dimensions.0;
+    let dimension_height = dimensions.1;
     let rgba_image = input_image.into_rgba8();
 
     let rgba_image = RGBAImage {
