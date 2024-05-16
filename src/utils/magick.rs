@@ -16,6 +16,8 @@ pub enum Error {
     Magick(magick_rust::MagickError),
     #[error("Io({0})")]
     Io(std::io::Error),
+    #[error(transparent)]
+    TryFromIntError(#[from] std::num::TryFromIntError),
 }
 
 /// # Errors
@@ -44,10 +46,10 @@ where
     wand.strip_image().map_err(Error::Magick)?;
 
     let (new_width, new_height) = fit(
-        wand.get_image_width() as u32,
-        wand.get_image_height() as u32,
-        width as u32,
-        height as u32,
+        u32::try_from(wand.get_image_width()).map_err(Error::TryFromIntError)?,
+        u32::try_from(wand.get_image_height()).map_err(Error::TryFromIntError)?,
+        u32::try_from(width).map_err(Error::TryFromIntError)?,
+        u32::try_from(height).map_err(Error::TryFromIntError)?,
     );
 
     if let Some(filter) = filter {
@@ -89,6 +91,7 @@ mod tests {
         )
         .unwrap();
     }
+
     #[test]
     fn magic_resize_and_auto_orient_gif() {
         use super::*;
