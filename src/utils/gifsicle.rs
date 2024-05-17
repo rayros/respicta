@@ -1,19 +1,23 @@
 use thiserror::Error;
 
-use crate::{Dimensions, PathAccessor};
+use crate::{Dimensions, PathAccessor, Quality};
 
 fn to_args<T>(config: &T) -> String
 where
-    T: PathAccessor + Dimensions,
+    T: PathAccessor + Dimensions + Quality,
 {
     let output_path = config.output_path().display();
     let input_path = config.input_path().display();
+    let quality = config.quality();
     let mut result = format!("-O3 --output {output_path}");
     if let Some(width) = config.width() {
         result = format!("{result} --resize-width {width}");
     }
     if let Some(height) = config.height() {
         result = format!("{result} --resize-height {height}");
+    }
+    if let Some(quality) = quality {
+        result = format!("{result} --lossy={quality}");
     }
     format!("{result} {input_path}")
 }
@@ -42,7 +46,7 @@ fn process_exit_code(code: Option<i32>) -> Result<(), Error> {
 ///
 pub fn optimize<T>(config: &T) -> Result<(), Error>
 where
-    T: PathAccessor + Dimensions,
+    T: PathAccessor + Dimensions + Quality,
 {
     let args = to_args(config);
     let command = format!("gifsicle {args}");

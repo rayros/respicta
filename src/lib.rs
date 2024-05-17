@@ -24,11 +24,18 @@ pub trait Dimensions {
     fn height(&self) -> Option<u32>;
 }
 
+pub trait Quality {
+    fn quality(&self) -> Option<u32>;
+}
+
+// TODO add derive_builder 
+
 pub struct Config {
     pub input_path: PathBuf,
     pub output_path: PathBuf,
     pub width: Option<u32>,
     pub height: Option<u32>,
+    pub quality: Option<u32>,
 }
 
 impl Config {
@@ -43,8 +50,10 @@ impl Config {
             output_path: output_path.as_ref().to_path_buf(),
             width,
             height,
+            quality: None,
         }
     }
+    
 }
 
 impl PathAccessor for Config {
@@ -64,6 +73,12 @@ impl Dimensions for Config {
 
     fn height(&self) -> Option<u32> {
         self.height
+    }
+}
+
+impl Quality for Config {
+    fn quality(&self) -> Option<u32> {
+        self.quality
     }
 }
 

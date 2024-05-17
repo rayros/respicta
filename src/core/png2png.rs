@@ -48,12 +48,12 @@ mod tests {
     fn png2png_test1() {
         use super::*;
 
-        convert(&Config {
-            input_path: "tests/files/png2png_test1.png".into(),
-            output_path: "target/png2png_test1.png".into(),
-            width: Some(100),
-            height: None,
-        })
+        convert(&Config::new(
+            "tests/files/png2png_test1.png",
+            "target/png2png_test1.png",
+            Some(100),
+            None
+        ))
         .unwrap();
     }
 
@@ -61,12 +61,12 @@ mod tests {
     fn png2png_test2() {
         use super::*;
 
-        convert(&Config {
-            input_path: "tests/files/png2png_test2.png".into(),
-            output_path: "target/png2png_test2.png".into(),
-            width: Some(100),
-            height: Some(100),
-        })
+        convert(&Config::new(
+            "tests/files/png2png_test2.png",
+            "target/png2png_test2.png",
+            Some(100),
+            Some(100),
+        ))
         .unwrap();
     }
 
