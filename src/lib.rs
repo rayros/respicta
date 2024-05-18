@@ -9,6 +9,7 @@ pub mod server;
 pub mod utils;
 
 use core::{gif2gif, gif2webp, jpeg2jpeg, jpeg2webp, png2jpeg, png2png, png2webp, webp2webp};
+use derive_builder::Builder;
 use extensions::{GIF, JFIF, JPEG, JPG, PNG, WEBP};
 use std::path::{Path, PathBuf};
 use thiserror::Error;
@@ -28,13 +29,17 @@ pub trait Quality {
     fn quality(&self) -> Option<u32>;
 }
 
-// TODO add derive_builder 
-
+#[derive(Default, Builder, Debug)]
 pub struct Config {
+    #[builder(setter(into))]
     pub input_path: PathBuf,
+    #[builder(setter(into))]
     pub output_path: PathBuf,
+    #[builder(setter(strip_option), default)]
     pub width: Option<u32>,
+    #[builder(setter(strip_option), default)]
     pub height: Option<u32>,
+    #[builder(setter(strip_option), default)]
     pub quality: Option<u32>,
 }
 

@@ -9,17 +9,18 @@ where
     let output_path = config.output_path().display();
     let input_path = config.input_path().display();
     let quality = config.quality();
-    let mut result = format!("-O3 --output {output_path}");
+    let mut result = format!("-O3");
     if let Some(width) = config.width() {
         result = format!("{result} --resize-width {width}");
     }
     if let Some(height) = config.height() {
         result = format!("{result} --resize-height {height}");
     }
-    if let Some(quality) = quality {
-        result = format!("{result} --lossy={quality}");
+    if let Some(mut quality) = quality {
+        quality = 100 - quality;
+        result = format!("{result} --lossy={quality} --dither");
     }
-    format!("{result} {input_path}")
+    format!("{result} {input_path} --output {output_path}")
 }
 
 #[derive(Debug, Error)]
@@ -67,19 +68,19 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::Config;
+    use crate::{Config, ConfigBuilder};
 
     #[test]
     fn gifsicle() {
         use super::*;
 
-        optimize(&Config::new(
-            "tests/files/gifsicle_test1.gif",
-            "target/gifsicle_test1.gif",
-            Some(100),
-            None,
-        ))
-        .unwrap();
+        optimize(&ConfigBuilder::default()
+            .input_path("tests/files/gifsicle_test1.gif")
+            .output_path("target/gifsicle_test1.gif")
+            .width(100)
+            .build()
+            .unwrap()
+        ).unwrap();
     }
 
     #[test]

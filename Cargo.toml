@@ -21,6 +21,7 @@ axum = { version = "0.7.5", features = ["multipart"], optional = true }
 clap = { version = "4.5.4", features = ["derive"], optional = true }
 tokio = { version = "1.37.0", features = ["macros", "rt-multi-thread", "fs", "signal"], optional = true }
 serde = { version = "1.0.202", features = ["derive"], optional = true }
+derive_builder = "0.20.0"
 
 [dev-dependencies]
 axum-test = "14.8.0"
