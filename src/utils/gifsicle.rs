@@ -8,15 +8,14 @@ where
 {
     let output_path = config.output_path().display();
     let input_path = config.input_path().display();
-    let quality = config.quality();
-    let mut result = format!("-O3");
+    let mut result = String::from("-O3");
     if let Some(width) = config.width() {
         result = format!("{result} --resize-width {width}");
     }
     if let Some(height) = config.height() {
         result = format!("{result} --resize-height {height}");
     }
-    if let Some(mut quality) = quality {
+    if let Some(mut quality) = config.quality() {
         quality = 100 - quality;
         result = format!("{result} --lossy={quality} --dither");
     }
