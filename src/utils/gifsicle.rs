@@ -129,4 +129,18 @@ mod tests {
 
         process_exit_code(None).unwrap();
     }
+
+    #[test]
+    fn low_quality() {
+        use super::*;
+
+        optimize(&ConfigBuilder::default()
+            .input_path("tests/files/gifsicle_test1.gif")
+            .output_path("target/gifsicle_low_quality.gif")
+            .width(100)
+            .quality(10)
+            .build()
+            .unwrap()
+        ).unwrap();
+    }
 }
