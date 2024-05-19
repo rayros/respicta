@@ -1,4 +1,4 @@
-use crate::{utils::magick, Dimensions, PathAccessor};
+use crate::{utils::magick, Dimensions, PathAccessor, Quality};
 
 /// # Errors
 ///
@@ -6,7 +6,7 @@ use crate::{utils::magick, Dimensions, PathAccessor};
 ///
 pub fn convert<T>(config: &T) -> std::result::Result<(), magick::Error>
 where
-    T: PathAccessor + Dimensions,
+    T: PathAccessor + Dimensions + Quality,
 {
     magick::optimize(config, None)
 }

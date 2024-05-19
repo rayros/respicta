@@ -4,7 +4,7 @@ use magick_rust::{magick_wand_genesis, MagickWand};
 use std::{fs::create_dir_all, sync::Once};
 use thiserror::Error;
 
-use crate::{Dimensions, PathAccessor};
+use crate::{Dimensions, PathAccessor, Quality};
 
 use super::fit;
 
@@ -26,7 +26,7 @@ pub enum Error {
 ///
 pub fn optimize<T>(config: &T, filter: Option<magick_rust::FilterType>) -> Result<(), Error>
 where
-    T: PathAccessor + Dimensions,
+    T: PathAccessor + Dimensions + Quality,
 {
     START.call_once(|| {
         magick_wand_genesis();
@@ -59,8 +59,14 @@ where
             .map_err(Error::Magick)?;
     }
 
-    wand.set_image_compression_quality(75)
-        .map_err(Error::Magick)?;
+    if let Some(quality) = config.quality() {
+        wand.set_image_compression_quality(quality as usize)
+            .map_err(Error::Magick)?;
+    } else {
+        // TODO remove when API get quality parameter
+        wand.set_image_compression_quality(75)
+            .map_err(Error::Magick)?;
+    }
 
     if let Some(parent) = config.output_path().parent() {
         create_dir_all(parent).map_err(Error::Io)?;
@@ -74,7 +80,7 @@ where
 mod tests {
     use magick_rust::bindings::FilterType_LanczosFilter;
 
-    use crate::Config;
+    use crate::{Config, ConfigBuilder};
 
     #[test]
     fn magic_resize_and_auto_orient() {
@@ -119,6 +125,23 @@ mod tests {
                 Some(240),
                 Some(100),
             ),
+            Some(FilterType_LanczosFilter),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn low_quality() {
+        use super::*;
+
+        optimize(
+            &ConfigBuilder::default()
+                .input_path("tests/files/orientation_test.jpg")
+                .output_path("target/magick_low_quality.jpg")
+                .width(240)
+                .quality(10)
+                .build()
+                .unwrap(),
             Some(FilterType_LanczosFilter),
         )
         .unwrap();
