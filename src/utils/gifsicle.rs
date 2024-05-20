@@ -76,7 +76,7 @@ mod tests {
         optimize(&ConfigBuilder::default()
             .input_path("tests/files/gifsicle_test1.gif")
             .output_path("target/gifsicle_test1.gif")
-            .width(100)
+            .width(Some(100))
             .build()
             .unwrap()
         ).unwrap();
@@ -137,8 +137,8 @@ mod tests {
         optimize(&ConfigBuilder::default()
             .input_path("tests/files/gifsicle_test1.gif")
             .output_path("target/gifsicle_low_quality.gif")
-            .width(100)
-            .quality(10)
+            .width(Some(100))
+            .quality(Some(10))
             .build()
             .unwrap()
         ).unwrap();

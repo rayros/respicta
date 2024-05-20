@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 use tempfile::tempdir;
 use tokio::fs::{read, write};
 
+// TODO Add quality
 #[derive(Deserialize, Serialize)]
 pub struct Params {
     extension: Option<String>,

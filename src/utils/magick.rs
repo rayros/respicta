@@ -138,8 +138,8 @@ mod tests {
             &ConfigBuilder::default()
                 .input_path("tests/files/orientation_test.jpg")
                 .output_path("target/magick_low_quality.jpg")
-                .width(240)
-                .quality(10)
+                .width(Some(240))
+                .quality(Some(10))
                 .build()
                 .unwrap(),
             Some(FilterType_LanczosFilter),

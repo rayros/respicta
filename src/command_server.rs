@@ -3,6 +3,7 @@ use crate::{convert, Config};
 use axum::{body::Body, http::StatusCode, response::Response, routing::post, Json, Router};
 use serde::Deserialize;
 
+// TODO Add quality
 #[derive(Deserialize, Debug)]
 struct Command {
     pub input_path: String,

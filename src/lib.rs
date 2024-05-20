@@ -35,11 +35,11 @@ pub struct Config {
     pub input_path: PathBuf,
     #[builder(setter(into))]
     pub output_path: PathBuf,
-    #[builder(setter(strip_option), default)]
+    #[builder(default)]
     pub width: Option<u32>,
-    #[builder(setter(strip_option), default)]
+    #[builder(default)]
     pub height: Option<u32>,
-    #[builder(setter(strip_option), default)]
+    #[builder(default)]
     pub quality: Option<u32>,
 }
 
