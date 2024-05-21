@@ -1,24 +1,28 @@
 use crate::app_error::AppError;
-use crate::{convert, Config};
+use crate::{convert, ConfigBuilder};
 use axum::{body::Body, http::StatusCode, response::Response, routing::post, Json, Router};
 use serde::Deserialize;
 
-// TODO Add quality
 #[derive(Deserialize, Debug)]
 struct Command {
     pub input_path: String,
     pub output_path: String,
     pub width: Option<u32>,
     pub height: Option<u32>,
+    pub quality: Option<u32>,
 }
 
 async fn convert_method(Json(payload): Json<Command>) -> Result<Response, AppError> {
-    convert(&Config::new(
-        payload.input_path,
-        payload.output_path,
-        payload.width,
-        payload.height,
-    ))?;
+    convert(
+        &ConfigBuilder::default()
+            .input_path(&payload.input_path)
+            .output_path(&payload.output_path)
+            .width(payload.width)
+            .height(payload.height)
+            .quality(payload.quality)
+            .build()
+            .unwrap(),
+    )?;
     let response = Response::builder()
         .status(StatusCode::OK)
         .body(Body::empty())?;

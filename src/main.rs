@@ -129,15 +129,17 @@ async fn main() {
             height,
             quality,
             ..
-        }) => convert(&ConfigBuilder::default()
-            .input_path(input_path)
-            .output_path(output_path)
-            .width(width)
-            .height(height)
-            .quality(quality)
-            .build()
-            .unwrap()
-        ).unwrap(),
+        }) => convert(
+            &ConfigBuilder::default()
+                .input_path(input_path)
+                .output_path(output_path)
+                .width(width)
+                .height(height)
+                .quality(quality)
+                .build()
+                .unwrap(),
+        )
+        .unwrap(),
         Some(Commands::Server { address, limit }) => {
             start_server(address, server::app(limit)).await.unwrap();
         }
