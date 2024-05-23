@@ -1,5 +1,5 @@
 use crate::app_error::AppError;
-use crate::{convert, Config};
+use crate::{convert, ConfigBuilder};
 use axum::extract::Query;
 use axum::{
     body::Body,
@@ -13,12 +13,12 @@ use serde::{Deserialize, Serialize};
 use tempfile::tempdir;
 use tokio::fs::{read, write};
 
-// TODO Add quality
 #[derive(Deserialize, Serialize)]
 pub struct Params {
     extension: Option<String>,
     width: Option<u32>,
     height: Option<u32>,
+    quality: Option<u32>,
 }
 
 async fn convert_method(
@@ -33,12 +33,16 @@ async fn convert_method(
     let output_path = input_path.with_extension(output_extension);
     let data = field.bytes().await?;
     write(&input_path, &data).await?;
-    convert(&Config::new(
-        &input_path,
-        &output_path,
-        params.width,
-        params.height,
-    ))?;
+    convert(
+        &ConfigBuilder::default()
+            .input_path(input_path)
+            .output_path(output_path.clone())
+            .width(params.width)
+            .height(params.height)
+            .quality(params.quality)
+            .build()
+            .unwrap(),
+    )?;
     let file_content = read(&output_path).await?;
     let body = Body::from(file_content);
     let response = Response::builder().status(StatusCode::OK).body(body)?;
@@ -141,6 +145,7 @@ mod tests {
                 extension: Some("jpeg".to_string()),
                 width: Some(100),
                 height: Some(100),
+                quality: Some(10),
             })
             .multipart(multipart_form)
             .await;
