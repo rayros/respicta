@@ -62,10 +62,6 @@ where
     if let Some(quality) = config.quality() {
         wand.set_image_compression_quality(quality as usize)
             .map_err(Error::Magick)?;
-    } else {
-        // TODO remove when API get quality parameter
-        wand.set_image_compression_quality(75)
-            .map_err(Error::Magick)?;
     }
 
     if let Some(parent) = config.output_path().parent() {
