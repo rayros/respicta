@@ -143,8 +143,6 @@ run().catch(console.error);
 
 ### Postman client
 
-### Postman client
-
 [<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://app.getpostman.com/run-collection/1281512-ce9f3b4a-5c85-49d0-b794-97999b48a0c7?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D1281512-ce9f3b4a-5c85-49d0-b794-97999b48a0c7%26entityType%3Dcollection%26workspaceId%3D1ee2b3bc-b936-48d7-b034-ff9b999f9ee5)
 
 # As a library
@@ -163,7 +161,9 @@ fn main() {
 }
 ```
 
-# Kubernetes example deployment (server)
+# Kubernetes
+
+## Server deployment
 
 How to use respicta inside pod for your custom resizer service.
 
@@ -197,7 +197,47 @@ spec:
               value: http://localhost:4000
 ```
 
-<!-- TODO Add kubernetes config example for command-server -->
+## Command-server deployment
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: my-resizer-service
+  name: my-resizer-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-resizer-service
+  template:
+    metadata:
+      labels:
+        app: my-resizer-service
+    spec:
+      containers:
+        - image: rayros/respicta:latest
+          name: respicta
+          args: ["command-server", "--address", "0.0.0.0:4000"]
+          volumeMounts:
+            - name: data-volume
+              mountPath: /data
+        - image: main-app-image:latest
+          name: main-app
+          ports:
+            - containerPort: 2137
+          env:
+            - name: RESPICTA_HREF
+              value: http://localhost:4000
+          volumeMounts:
+            - name: data-volume
+              mountPath: /data
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: my-resizer-storage-pvc
+```
 
 ---
 
