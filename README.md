@@ -240,6 +240,9 @@ spec:
 ```
 
 ---
+<!-- TODO Add docker-compose.yml -->
+<!-- TODO Article how to use respicta to get LQIP -->
+<!-- TODO Add AVIF -->
 
 ##### Program utilized in:
 
