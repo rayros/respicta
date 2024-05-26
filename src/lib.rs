@@ -58,7 +58,6 @@ impl Config {
             quality: None,
         }
     }
-    
 }
 
 impl PathAccessor for Config {
@@ -126,7 +125,6 @@ pub fn convert(config: &Config) -> Result<(), Error> {
         config
             .input_path()
             .extension()
-            // to lower case
             .and_then(std::ffi::OsStr::to_str)
             .map(str::to_lowercase),
         config
