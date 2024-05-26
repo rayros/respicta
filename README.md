@@ -34,21 +34,21 @@ docker run --rm -v ./:/images rayros/respicta convert --help
 ```plaintext
 Convert images from one format to another
 
-Usage: image-resizer convert [OPTIONS] <INPUT_PATH> <OUTPUT_PATH>
+Usage: respicta convert [OPTIONS] <INPUT_PATH> <OUTPUT_PATH>
 
 Arguments:
   <INPUT_PATH>   Input image path
   <OUTPUT_PATH>  Output image path
 
 Options:
-      --help             
-  -w, --width <WIDTH>    Width of the output image If not set, the width will be the same as the input image
-  -h, --height <HEIGHT>  Height of the output image If not set, the height will be the same as the input image
+  -w, --width <WIDTH>      Width of the output image If not set, the width will be the same as the input image
+  -h, --height <HEIGHT>    Height of the output image If not set, the height will be the same as the input image
+  -q, --quality <QUALITY>  Quality of the output image. If not set, the quality will be the same as the input image. The value must be between 1 and 100. The higher the value, the better the quality
+      --help               
 
+Examples: 
 
-Examples:
-
-  image-resizer convert --width 100 --height 100 input.jpg output.jpg
+respicta convert --width 100 --height 100 --quality 75 input.jpg output.jpg
 ```
 
 ### Server
