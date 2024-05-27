@@ -161,6 +161,30 @@ fn main() {
 }
 ```
 
+# Docker compose
+
+```yaml
+version: '3.9'
+
+services:
+  respicta:
+    image: rayros/respicta:latest
+    restart: always
+    command: command-server
+    volumes:
+      - ./data/respicta:/data
+
+  main-app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./data/respicta:/data
+    restart: always
+    environment:
+      RESPICTA_HREF: http://respicta:3000
+```
+
 # Kubernetes
 
 ## Server deployment
@@ -240,7 +264,6 @@ spec:
 ```
 
 ---
-<!-- TODO Add docker-compose.yml -->
 <!-- TODO Article how to use respicta to get LQIP -->
 <!-- TODO Add AVIF -->
 
