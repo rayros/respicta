@@ -290,7 +290,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "Jpeg2Jpeg(Magick(MagickError(\"failed to read image\")))"]
+    #[should_panic = "Jpeg2Jpeg(Magick(MagickError(\"unable to open image 'tests/files/not_existing.jpg':"]
     fn convert_panic_jpg_to_jpg() {
         use super::*;
 
@@ -304,7 +304,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "Png2Png(Magick(Magick(MagickError(\"failed to read image\"))))"]
+    #[should_panic = "Png2Png(Magick(Magick(MagickError(\"unable to open image 'tests/files/not_existing.png':"]
     fn convert_panic_png_to_png() {
         use super::*;
 
@@ -402,7 +402,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "Png2Jpeg(Magick(MagickError(\"failed to read image\")))"]
+    #[should_panic = "Png2Jpeg(Magick(MagickError(\"unable to open image 'tests/files/not_existing.png':"]
     fn convert_panic_png_to_jpg() {
         use super::*;
 

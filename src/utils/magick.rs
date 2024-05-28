@@ -53,7 +53,9 @@ where
     );
 
     if let Some(filter) = filter {
-        wand.resize_image(new_width as usize, new_height as usize, filter);
+        let _ = wand
+            .resize_image(new_width as usize, new_height as usize, filter)
+            .map_err(Error::Magick);
     } else {
         wand.adaptive_resize_image(new_width as usize, new_height as usize)
             .map_err(Error::Magick)?;
@@ -74,7 +76,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use magick_rust::bindings::FilterType_LanczosFilter;
+    use magick_rust::FilterType;
 
     use crate::{Config, ConfigBuilder};
 
@@ -89,7 +91,7 @@ mod tests {
                 Some(240),
                 Some(100),
             ),
-            Some(FilterType_LanczosFilter),
+            Some(FilterType::Lanczos),
         )
         .unwrap();
     }
@@ -121,7 +123,7 @@ mod tests {
                 Some(240),
                 Some(100),
             ),
-            Some(FilterType_LanczosFilter),
+            Some(FilterType::Lanczos),
         )
         .unwrap();
     }
@@ -138,7 +140,7 @@ mod tests {
                 .quality(Some(10))
                 .build()
                 .unwrap(),
-            Some(FilterType_LanczosFilter),
+            Some(FilterType::Lanczos),
         )
         .unwrap();
     }

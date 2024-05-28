@@ -52,7 +52,7 @@ mod tests {
             "tests/files/png2png_test1.png",
             "target/png2png_test1.png",
             Some(100),
-            None
+            None,
         ))
         .unwrap();
     }
@@ -71,7 +71,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "Magick(MagickError(\"failed to read image\"))"]
+    #[should_panic = "Magick(MagickError(\"unable to open image 'tests/files/png2png_notexisting_test1.png':"]
     fn png2png_panic() {
         use super::*;
 
