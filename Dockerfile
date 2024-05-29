@@ -43,6 +43,16 @@ FROM build as release
 
 RUN cargo build --release --features=cli
 
+FROM base as checks
+
+RUN cargo install cargo-semver-checks --locked
+
+WORKDIR /app
+
+COPY . ./
+
+RUN cargo semver-checks
+
 FROM base as publish
 
 RUN cargo install cargo-semver-checks --locked
