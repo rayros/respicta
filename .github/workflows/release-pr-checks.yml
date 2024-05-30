@@ -5,6 +5,9 @@ on:
     branches:
       - release
 
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+
 jobs:
   checks:
     runs-on: ubuntu-latest
