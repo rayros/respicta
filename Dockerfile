@@ -45,13 +45,17 @@ RUN cargo build --release --features=cli
 
 FROM base as checks
 
-RUN cargo install cargo-semver-checks --locked
+RUN cargo install cargo-semver-checks cargo-audit --locked
 
 WORKDIR /app
 
 COPY . ./
 
+RUN cargo test --all-features
+
 RUN cargo semver-checks
+
+RUN cargo audit
 
 FROM base as publish
 
