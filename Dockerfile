@@ -6,7 +6,7 @@ RUN apt-get update \
  && apt-get -y install curl build-essential cmake clang pkg-config libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp libwebp-dev libssl-dev \
  && rm -rfv /var/lib/apt/lists/*
 
-ENV MAGICK_VERSION 7.1.1-32
+ENV MAGICK_VERSION 7.1.1-33
 
 RUN curl https://imagemagick.org/archive/ImageMagick-${MAGICK_VERSION}.tar.gz | tar xz \
  && cd ImageMagick-${MAGICK_VERSION} \
@@ -15,6 +15,8 @@ RUN curl https://imagemagick.org/archive/ImageMagick-${MAGICK_VERSION}.tar.gz | 
  && make install \
  && cd .. \
  && rm -r ImageMagick-${MAGICK_VERSION}*
+
+ENV LD_LIBRARY_PATH=/usr/local/lib
 
 FROM base as build
 
@@ -29,8 +31,6 @@ RUN cargo build
 COPY ./src ./src
 
 RUN cargo build
-
-ENV LD_LIBRARY_PATH=/usr/local/lib
 
 FROM build as test
 
