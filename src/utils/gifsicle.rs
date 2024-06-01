@@ -1,25 +1,34 @@
-use crate::{Dimensions, PathAccessor};
+use thiserror::Error;
+
+use crate::{Dimensions, PathAccessor, Quality};
 
 fn to_args<T>(config: &T) -> String
 where
-    T: PathAccessor + Dimensions,
+    T: PathAccessor + Dimensions + Quality,
 {
     let output_path = config.output_path().display();
     let input_path = config.input_path().display();
-    let mut result = format!("-O3 --output {output_path}");
+    let mut result = String::from("-O3");
     if let Some(width) = config.width() {
         result = format!("{result} --resize-width {width}");
     }
     if let Some(height) = config.height() {
         result = format!("{result} --resize-height {height}");
     }
-    format!("{result} {input_path}")
+    if let Some(mut quality) = config.quality() {
+        quality = 100 - quality;
+        result = format!("{result} --lossy={quality} --dither");
+    }
+    format!("{result} {input_path} --output {output_path}")
 }
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum Error {
+    #[error("Io({0})")]
     Io(std::io::Error),
+    #[error("Exit({0})")]
     Exit(i32),
+    #[error("Signal")]
     Signal,
 }
 
@@ -37,7 +46,7 @@ fn process_exit_code(code: Option<i32>) -> Result<(), Error> {
 ///
 pub fn optimize<T>(config: &T) -> Result<(), Error>
 where
-    T: PathAccessor + Dimensions,
+    T: PathAccessor + Dimensions + Quality,
 {
     let args = to_args(config);
     let command = format!("gifsicle {args}");
@@ -58,19 +67,19 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::Config;
+    use crate::{Config, ConfigBuilder};
 
     #[test]
     fn gifsicle() {
         use super::*;
 
-        optimize(&Config::new(
-            "tests/files/gifsicle_test1.gif",
-            "target/gifsicle_test1.gif",
-            Some(100),
-            None,
-        ))
-        .unwrap();
+        optimize(&ConfigBuilder::default()
+            .input_path("tests/files/gifsicle_test1.gif")
+            .output_path("target/gifsicle_test1.gif")
+            .width(Some(100))
+            .build()
+            .unwrap()
+        ).unwrap();
     }
 
     #[test]
@@ -119,5 +128,19 @@ mod tests {
         use super::*;
 
         process_exit_code(None).unwrap();
+    }
+
+    #[test]
+    fn low_quality() {
+        use super::*;
+
+        optimize(&ConfigBuilder::default()
+            .input_path("tests/files/gifsicle_test1.gif")
+            .output_path("target/gifsicle_low_quality.gif")
+            .width(Some(100))
+            .quality(Some(10))
+            .build()
+            .unwrap()
+        ).unwrap();
     }
 }

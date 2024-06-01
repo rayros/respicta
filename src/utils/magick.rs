@@ -2,26 +2,31 @@
 
 use magick_rust::{magick_wand_genesis, MagickWand};
 use std::{fs::create_dir_all, sync::Once};
+use thiserror::Error;
 
-use crate::{Dimensions, PathAccessor};
+use crate::{Dimensions, PathAccessor, Quality};
 
 use super::fit;
 
 static START: Once = Once::new();
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum Error {
+    #[error("Magick({0})")]
     Magick(magick_rust::MagickError),
+    #[error("Io({0})")]
     Io(std::io::Error),
+    #[error(transparent)]
+    TryFromIntError(#[from] std::num::TryFromIntError),
 }
 
 /// # Errors
 ///
 /// Returns an error if the optimization fails.
 ///
-pub fn optimize<T>(config: &T) -> Result<(), Error>
+pub fn optimize<T>(config: &T, filter: Option<magick_rust::FilterType>) -> Result<(), Error>
 where
-    T: PathAccessor + Dimensions,
+    T: PathAccessor + Dimensions + Quality,
 {
     START.call_once(|| {
         magick_wand_genesis();
@@ -41,17 +46,25 @@ where
     wand.strip_image().map_err(Error::Magick)?;
 
     let (new_width, new_height) = fit(
-        wand.get_image_width() as u32,
-        wand.get_image_height() as u32,
-        width as u32,
-        height as u32,
+        u32::try_from(wand.get_image_width()).map_err(Error::TryFromIntError)?,
+        u32::try_from(wand.get_image_height()).map_err(Error::TryFromIntError)?,
+        u32::try_from(width).map_err(Error::TryFromIntError)?,
+        u32::try_from(height).map_err(Error::TryFromIntError)?,
     );
 
-    wand.adaptive_resize_image(new_width as usize, new_height as usize)
-        .map_err(Error::Magick)?;
+    if let Some(filter) = filter {
+        let _ = wand
+            .resize_image(new_width as usize, new_height as usize, filter)
+            .map_err(Error::Magick);
+    } else {
+        wand.adaptive_resize_image(new_width as usize, new_height as usize)
+            .map_err(Error::Magick)?;
+    }
 
-    wand.set_image_compression_quality(75)
-        .map_err(Error::Magick)?;
+    if let Some(quality) = config.quality() {
+        wand.set_image_compression_quality(quality as usize)
+            .map_err(Error::Magick)?;
+    }
 
     if let Some(parent) = config.output_path().parent() {
         create_dir_all(parent).map_err(Error::Io)?;
@@ -63,30 +76,39 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::Config;
+    use magick_rust::FilterType;
+
+    use crate::{Config, ConfigBuilder};
 
     #[test]
     fn magic_resize_and_auto_orient() {
         use super::*;
 
-        optimize(&Config::new(
-            "tests/files/orientation_test.jpg",
-            "target/magick_out.jpg",
-            Some(240),
-            Some(100),
-        ))
+        optimize(
+            &Config::new(
+                "tests/files/orientation_test.jpg",
+                "target/magick_out.jpg",
+                Some(240),
+                Some(100),
+            ),
+            Some(FilterType::Lanczos),
+        )
         .unwrap();
     }
+
     #[test]
     fn magic_resize_and_auto_orient_gif() {
         use super::*;
 
-        optimize(&Config::new(
-            "tests/files/test1.gif",
-            "target/magick_out.gif",
-            Some(100),
-            Some(100),
-        ))
+        optimize(
+            &Config::new(
+                "tests/files/test1.gif",
+                "target/magick_out.gif",
+                Some(100),
+                Some(100),
+            ),
+            None,
+        )
         .unwrap();
     }
 
@@ -94,12 +116,32 @@ mod tests {
     fn nested_dir() {
         use super::*;
 
-        optimize(&Config::new(
-            "tests/files/orientation_test.jpg",
-            "target/magick_nested/magick_out.jpg",
-            Some(240),
-            Some(100),
-        ))
+        optimize(
+            &Config::new(
+                "tests/files/orientation_test.jpg",
+                "target/magick_nested/magick_out.jpg",
+                Some(240),
+                Some(100),
+            ),
+            Some(FilterType::Lanczos),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn low_quality() {
+        use super::*;
+
+        optimize(
+            &ConfigBuilder::default()
+                .input_path("tests/files/orientation_test.jpg")
+                .output_path("target/magick_low_quality.jpg")
+                .width(Some(240))
+                .quality(Some(10))
+                .build()
+                .unwrap(),
+            Some(FilterType::Lanczos),
+        )
         .unwrap();
     }
 }

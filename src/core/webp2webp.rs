@@ -1,6 +1,6 @@
 use crate::{
     utils::webp::{self, Error},
-    Dimensions, PathAccessor,
+    Dimensions, PathAccessor, Quality,
 };
 
 /// # Errors
@@ -9,7 +9,7 @@ use crate::{
 ///
 pub fn convert<T>(config: &T) -> Result<(), Error>
 where
-    T: PathAccessor + Dimensions,
+    T: PathAccessor + Dimensions + Quality,
 {
     webp::optimize(config)
 }

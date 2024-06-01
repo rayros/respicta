@@ -1,4 +1,6 @@
-use crate::{utils::magick, Dimensions, PathAccessor};
+use magick_rust::FilterType;
+
+use crate::{utils::magick, Dimensions, PathAccessor, Quality};
 
 /// # Errors
 ///
@@ -6,9 +8,9 @@ use crate::{utils::magick, Dimensions, PathAccessor};
 ///
 pub fn convert<T>(config: &T) -> std::result::Result<(), magick::Error>
 where
-    T: PathAccessor + Dimensions,
+    T: PathAccessor + Dimensions + Quality,
 {
-    magick::optimize(config)
+    magick::optimize(config, Some(FilterType::Lanczos))
 }
 
 #[cfg(test)]
@@ -29,7 +31,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "MagickError(\"failed to read image\")"]
+    #[should_panic = "MagickError(\"unable to open image 'tests/files/jpeg2jpeg_notexisting_test1.jpg':"]
     fn jpeg2jpeg_panic() {
         use super::*;
 

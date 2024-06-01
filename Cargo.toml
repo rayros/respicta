@@ -1,31 +1,34 @@
 [package]
 name = "respicta"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 repository = "https://github.com/rayros/image-resizer"
 readme = "README.md"
 license = "MIT"
 description = "Respicta is a versatile project offering a library, command-line interface (CLI), and web service for resizing images and changing their formats seamlessly."
 keywords = ["image", "resize", "convert", "cli", "web-service"]
+categories = ["image-processing", "cli", "web-service"]
 exclude = [".github", ".vscode", "tests"]
 
 [dependencies]
-anyhow = "1.0.82"
-thiserror = "1.0.59"
+anyhow = "1.0.86"
+thiserror = "1.0.61"
+# TODO Remove dependency after writing png and jpeg decoder for webp
 image = "0.25.1"
 libwebp-sys = "0.9.5"
-magick_rust = "0.21.0"
-oxipng = { version = "9.0", features = ["parallel", "zopfli", "filetime"], default-features = false }
+magick_rust = "1.0.0"
+oxipng = { version = "9.1.1", features = ["parallel", "zopfli", "filetime"], default-features = false }
 tempfile = { version = "3.10.1", optional = true }
 axum = { version = "0.7.5", features = ["multipart"], optional = true }
 clap = { version = "4.5.4", features = ["derive"], optional = true }
 tokio = { version = "1.37.0", features = ["macros", "rt-multi-thread", "fs", "signal"], optional = true }
-serde = { version = "1.0.198", features = ["derive"], optional = true }
+serde = { version = "1.0.203", features = ["derive"], optional = true }
+derive_builder = "0.20.0"
 
 [dev-dependencies]
-axum-test = "14.8.0"
+axum-test = "14.9.1"
 reqwest = { version = "0.12.4", features = ["multipart"] }
-serde_json = "1.0.116"
+serde_json = "1.0.117"
 
 [features]
 server-app-error = []

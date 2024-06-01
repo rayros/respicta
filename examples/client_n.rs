@@ -8,7 +8,7 @@ async fn send_request() {
     );
     reqwest::Client::new()
         .post("http://localhost:3000/")
-        .header("extension", "webp")
+        .query(&[("extension", "webp"), ("width", "100"), ("height", "100")])
         .multipart(multipart)
         .send()
         .await

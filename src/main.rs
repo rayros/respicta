@@ -20,7 +20,7 @@ mod cli {
             after_help = "\
                 Examples: \n\
                 \n\
-                respicta convert --width 100 --height 100 input.jpg output.jpg
+                respicta convert --width 100 --height 100 --quality 75 input.jpg output.jpg
                 "
         )]
         /// Convert images from one format to another
@@ -37,6 +37,12 @@ mod cli {
             /// If not set, the height will be the same as the input image
             #[clap(short, long)]
             height: Option<u32>,
+            /// Quality of the output image.
+            /// If not set, the quality will be the same as the input image.
+            /// The value must be between 1 and 100.
+            /// The higher the value, the better the quality.
+            #[clap(short, long)]
+            quality: Option<u32>,
             #[clap(long, action = clap::ArgAction::HelpLong)]
             help: Option<bool>,
         },
@@ -111,7 +117,7 @@ mod cli {
 async fn main() {
     use crate::cli::{start_server, Cli, Commands};
     use clap::Parser;
-    use respicta::{command_server, convert, server, Config};
+    use respicta::{command_server, convert, server, ConfigBuilder};
 
     let cli = Cli::parse();
 
@@ -121,8 +127,19 @@ async fn main() {
             output_path,
             width,
             height,
+            quality,
             ..
-        }) => convert(&Config::new(input_path, output_path, width, height)).unwrap(),
+        }) => convert(
+            &ConfigBuilder::default()
+                .input_path(input_path)
+                .output_path(output_path)
+                .width(width)
+                .height(height)
+                .quality(quality)
+                .build()
+                .unwrap(),
+        )
+        .unwrap(),
         Some(Commands::Server { address, limit }) => {
             start_server(address, server::app(limit)).await.unwrap();
         }

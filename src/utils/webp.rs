@@ -4,7 +4,7 @@ use std::{
 };
 use thiserror::Error;
 
-use crate::{Dimensions, PathAccessor};
+use crate::{Dimensions, PathAccessor, Quality};
 use image::{io::Reader, GenericImageView};
 use libwebp_sys::{
     VP8StatusCode, WebPConfig, WebPEncode, WebPEncodingError, WebPMemoryWrite, WebPMemoryWriter,
@@ -16,42 +16,8 @@ use super::fit;
 
 pub struct RGBAImage {
     pub data: *const u8,
-    pub width: i32,
-    pub height: i32,
-}
-
-pub struct NewDimensions {
-    pub width: Option<u32>,
-    pub height: Option<u32>,
-}
-
-impl Dimensions for NewDimensions {
-    fn width(&self) -> Option<u32> {
-        self.width
-    }
-
-    fn height(&self) -> Option<u32> {
-        self.height
-    }
-}
-
-impl NewDimensions {
-    fn fit_dimensions<T>(image: &RGBAImage, config: &T) -> NewDimensions
-    where
-        T: Dimensions,
-    {
-        let (new_width, new_height) = fit(
-            image.width as u32,
-            image.height as u32,
-            config.width().unwrap_or(image.width as u32),
-            config.height().unwrap_or(image.height as u32),
-        );
-
-        NewDimensions {
-            width: Some(new_width),
-            height: Some(new_height),
-        }
-    }
+    pub width: u32,
+    pub height: u32,
 }
 
 #[derive(Debug, Error)]
@@ -64,21 +30,38 @@ pub enum LibWebPError {
     Picture(()),
     #[error("Failed to encode WebP image: {0:?}")]
     Encoding(WebPEncodingError),
+    #[error(transparent)]
+    TryFromIntError(#[from] std::num::TryFromIntError),
 }
 
 fn rgba_to_webp<T>(image: &RGBAImage, config: &T) -> Result<Vec<u8>, LibWebPError>
 where
-    T: Dimensions,
+    T: Dimensions + Quality,
 {
+    let (target_width, target_height) = fit(
+        image.width,
+        image.height,
+        config.width().unwrap_or(image.width),
+        config.height().unwrap_or(image.height),
+    );
+
     let mut webp_config = WebPConfig::new().map_err(LibWebPError::ConfigInit)?;
-    webp_config.lossless = 1;
-    webp_config.alpha_compression = 1;
-    webp_config.quality = 1.0;
+
+    #[allow(clippy::cast_precision_loss)]
+    if let Some(quality) = config.quality() {
+        webp_config.lossless = 0;
+        webp_config.alpha_compression = 1;
+        webp_config.quality = quality as f32;
+    } else {
+        webp_config.lossless = 1;
+        webp_config.alpha_compression = 1;
+        webp_config.quality = 100.0;
+    }
 
     let mut picture = WebPPicture::new().map_err(LibWebPError::Picture)?;
     picture.use_argb = 1;
-    picture.width = image.width;
-    picture.height = image.height;
+    picture.width = i32::try_from(image.width).map_err(LibWebPError::TryFromIntError)?;
+    picture.height = i32::try_from(image.height).map_err(LibWebPError::TryFromIntError)?;
 
     let mut ww: ::core::mem::MaybeUninit<WebPMemoryWriter> = ::core::mem::MaybeUninit::uninit();
     picture.writer = Some(WebPMemoryWrite);
@@ -90,18 +73,15 @@ where
         }
 
         let memory_writer_ptr = ww.as_mut_ptr();
+
         WebPMemoryWriterInit(memory_writer_ptr);
-        WebPPictureImportRGBA(&mut picture, image.data, image.width * 4);
 
-        let target_width = config
-            .width()
-            .and_then(|w| i32::try_from(w).ok())
-            .unwrap_or(0);
+        let rgba_stride = i32::try_from(image.width * 4).map_err(LibWebPError::TryFromIntError)?;
 
-        let target_height = config
-            .height()
-            .and_then(|h| i32::try_from(h).ok())
-            .unwrap_or(0);
+        WebPPictureImportRGBA(&mut picture, image.data, rgba_stride);
+
+        let target_width = i32::try_from(target_width).map_err(LibWebPError::TryFromIntError)?;
+        let target_height = i32::try_from(target_height).map_err(LibWebPError::TryFromIntError)?;
 
         WebPPictureRescale(&mut picture, target_width, target_height);
 
@@ -128,8 +108,6 @@ pub enum Error {
     #[error(transparent)]
     Image(#[from] image::ImageError),
     #[error(transparent)]
-    TryFromIntError(#[from] std::num::TryFromIntError),
-    #[error(transparent)]
     LibWebPError(#[from] LibWebPError),
 }
 
@@ -139,7 +117,7 @@ pub enum Error {
 ///
 pub fn optimize<T>(config: &T) -> Result<(), Error>
 where
-    T: PathAccessor + Dimensions,
+    T: PathAccessor + Dimensions + Quality,
 {
     let input_image = Reader::open(config.input_path())
         .map_err(Error::Io)?
@@ -149,8 +127,8 @@ where
         .map_err(Error::Image)?;
 
     let dimensions = input_image.dimensions();
-    let dimension_width = i32::try_from(dimensions.0).map_err(Error::TryFromIntError)?;
-    let dimension_height = i32::try_from(dimensions.1).map_err(Error::TryFromIntError)?;
+    let dimension_width = dimensions.0;
+    let dimension_height = dimensions.1;
     let rgba_image = input_image.into_rgba8();
 
     let rgba_image = RGBAImage {
@@ -159,9 +137,7 @@ where
         height: dimension_height,
     };
 
-    let new_dimensions = NewDimensions::fit_dimensions(&rgba_image, config);
-
-    let contents = rgba_to_webp(&rgba_image, &new_dimensions).map_err(Error::LibWebPError)?;
+    let contents = rgba_to_webp(&rgba_image, config).map_err(Error::LibWebPError)?;
 
     if let Some(parent) = config.output_path().parent() {
         create_dir_all(parent).map_err(Error::Io)?;
@@ -182,6 +158,10 @@ fn process_exit_code(code: Option<i32>) -> std::result::Result<(), std::io::Erro
     }
 }
 
+/// # Errors
+///
+/// Returns an error if the command gif2webp fails.
+///
 pub fn optimize_gif<T>(config: &T) -> Result<(), std::io::Error>
 where
     T: PathAccessor,
@@ -201,7 +181,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::{core::PathIO, Config};
+    use crate::{core::PathIO, Config, ConfigBuilder};
 
     #[test]
     fn webp_optimize_png_to_webp() {
@@ -258,5 +238,20 @@ mod tests {
         use super::*;
 
         process_exit_code(None).unwrap();
+    }
+
+    #[test]
+    fn low_quality() {
+        use super::*;
+
+        optimize(&ConfigBuilder::default()
+            .input_path("tests/files/issue-159.png")
+            .output_path("target/webp_low_quality.webp")
+            .width(Some(100))
+            .quality(Some(10))
+            .build()
+            .unwrap()
+        )
+        .unwrap();
     }
 }
