@@ -1340,6 +1340,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "nasm-rs"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fe4d98d0065f4b1daf164b3eafb11974c94662e5e2396cf03f32d0bb5c17da51"
+dependencies = [
+ "rayon",
+]
+
+[[package]]
 name = "native-tls"
 version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1719,6 +1728,7 @@ dependencies = [
  "av1-grain",
  "bitstream-io",
  "built",
+ "cc",
  "cfg-if",
  "interpolate_name",
  "itertools",
@@ -1726,6 +1736,7 @@ dependencies = [
  "libfuzzer-sys",
  "log",
  "maybe-rayon",
+ "nasm-rs",
  "new_debug_unreachable",
  "noop_proc_macro",
  "num-derive",
@@ -1881,6 +1892,7 @@ dependencies = [
  "libwebp-sys",
  "magick_rust",
  "oxipng",
+ "ravif",
  "reqwest",
  "serde",
  "serde_json",
