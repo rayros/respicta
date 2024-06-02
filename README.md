@@ -266,6 +266,7 @@ spec:
 ---
 <!-- TODO Article how to use respicta to get LQIP -->
 <!-- TODO Add AVIF -->
+<!-- TODO Add doc.rs link to readme -->
 
 ##### Program utilized in:
 
