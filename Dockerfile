@@ -3,7 +3,7 @@ FROM rust:slim-bookworm as base
 WORKDIR /
 
 RUN apt-get update \
- && apt-get -y install curl build-essential cmake clang pkg-config libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp libwebp-dev libssl-dev \
+ && apt-get -y install nasm curl build-essential cmake clang pkg-config libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp libwebp-dev libssl-dev \
  && rm -rfv /var/lib/apt/lists/*
 
 ENV MAGICK_VERSION 7.1.1-33
