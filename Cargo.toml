@@ -25,6 +25,10 @@ tokio = { version = "1.37.0", features = ["macros", "rt-multi-thread", "fs", "si
 serde = { version = "1.0.203", features = ["derive"], optional = true }
 derive_builder = "0.20.0"
 ravif = "0.11.5"
+png = "0.17.13"
+imgref = "1.10.1"
+rgb = "0.8.37"
+resize = "0.8.4"
 
 [dev-dependencies]
 axum-test = "14.9.1"

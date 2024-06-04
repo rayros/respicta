@@ -1880,6 +1880,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "resize"
+version = "0.8.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c3e29f584c07a8396c5e2eee0bd8d7aec5c8d9e0a3c2333806fd2ec1d2a5b080"
+dependencies = [
+ "rayon",
+ "rgb",
+]
+
+[[package]]
 name = "respicta"
 version = "0.3.0"
 dependencies = [
@@ -1889,11 +1899,15 @@ dependencies = [
  "clap",
  "derive_builder",
  "image",
+ "imgref",
  "libwebp-sys",
  "magick_rust",
  "oxipng",
+ "png",
  "ravif",
  "reqwest",
+ "resize",
+ "rgb",
  "serde",
  "serde_json",
  "tempfile",
