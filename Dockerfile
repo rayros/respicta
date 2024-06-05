@@ -45,11 +45,13 @@ RUN cargo build --release --features=cli
 
 FROM base as checks
 
-RUN cargo install cargo-semver-checks cargo-audit --locked
+RUN cargo install cargo-semver-checks cargo-audit cargo-outdated --locked
 
 WORKDIR /app
 
 COPY . ./
+
+RUN cargo outdated --exit-code 1
 
 RUN cargo test --all-features
 
