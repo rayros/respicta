@@ -5,27 +5,37 @@ use crate::{utils::fit, Dimensions, PathAccessor, Quality};
 use resize::Type::Lanczos3;
 use std::{fs::File, io::Write};
 
-pub fn convert<T>(config: &T) -> std::result::Result<(), anyhow::Error>
+#[derive(Debug)]
+pub enum Error {
+    Io(std::io::Error),
+    Decoding(png::DecodingError),
+    UnsupportedColorType(png::ColorType),
+    Resize(resize::Error),
+    Encoding(ravif::Error),
+}
+
+// TODO Add Result and errors comment
+pub fn convert<T>(config: &T) -> std::result::Result<(), Error>
 where
     T: PathAccessor + Dimensions + Quality,
 {
-    let mut decoder = png::Decoder::new(File::open(config.input_path()).unwrap());
+    let mut decoder = png::Decoder::new(File::open(config.input_path()).map_err(Error::Io)?);
     decoder.set_transformations(png::Transformations::normalize_to_color8());
-    let mut reader = decoder.read_info().unwrap();
+    let mut reader = decoder.read_info().map_err(Error::Decoding)?;
 
     let mut buf = vec![0; reader.output_buffer_size()];
-    let info = reader.next_frame(&mut buf).unwrap();
-    println!("Color type: {:?}", reader.output_color_type());
-    println!("Bit depth: {:?}", info.bit_depth);
-    println!("Buffer size: {:?}", reader.output_buffer_size());
-    println!("Output buffer size: {:?}", info.buffer_size());
-    println!("Width: {:?}", info.width);
-    println!("Height: {:?}", info.height);
+    let info = reader.next_frame(&mut buf).map_err(Error::Decoding)?;
+    // println!("Color type: {:?}", reader.output_color_type());
+    // println!("Bit depth: {:?}", info.bit_depth);
+    // println!("Buffer size: {:?}", reader.output_buffer_size());
+    // println!("Output buffer size: {:?}", info.buffer_size());
+    // println!("Width: {:?}", info.width);
+    // println!("Height: {:?}", info.height);
 
     let bytes = &buf[..info.buffer_size()];
-    let mut writer = File::create(config.output_path()).unwrap();
-    let src = match reader.output_color_type() {
-        (png::ColorType::Rgb, _) => {
+    let mut writer = File::create(config.output_path()).map_err(Error::Io)?;
+    let src = match info.color_type {
+        png::ColorType::Rgb => {
             let mut rgba_bytes = Vec::with_capacity(info.width as usize * info.height as usize * 4);
             for chunk in bytes.chunks(3) {
                 rgba_bytes.push(chunk[0]);
@@ -35,15 +45,16 @@ where
             }
             rgba_bytes
         }
-        (png::ColorType::Rgba, _) => bytes.to_vec(),
+        png::ColorType::Rgba => bytes.to_vec(),
         _ => {
-            return Err(anyhow::anyhow!("Unsupported color type"));
+            return Err(Error::UnsupportedColorType(info.color_type));
         }
     };
     let width = config.width().unwrap_or(info.width);
     let height = config.height().unwrap_or(info.height);
     let (new_width, new_height) = fit(info.width, info.height, width, height);
-    let mut dest = vec![0; (new_width * new_height * 4).try_into().unwrap()];
+    let size = new_width * new_height * 4;
+    let mut dest = vec![0; size as usize];
     let mut resizer = resize::new(
         info.width as usize,
         info.height as usize,
@@ -51,8 +62,11 @@ where
         new_height as usize,
         resize::Pixel::RGBA8,
         Lanczos3,
-    )?;
-    resizer.resize(src.as_rgba(), dest.as_rgba_mut())?;
+    )
+    .map_err(Error::Resize)?;
+    resizer
+        .resize(src.as_rgba(), dest.as_rgba_mut())
+        .map_err(Error::Resize)?;
 
     let img = ravif::Img::new(dest.as_rgba(), new_width as usize, new_height as usize);
     let mut encoder = ravif::Encoder::new().with_speed(4);
@@ -61,8 +75,8 @@ where
         encoder = encoder.with_quality(quality as f32);
     }
 
-    let result = encoder.encode_rgba(img.as_ref()).unwrap();
-    writer.write_all(&result.avif_file).unwrap();
+    let result = encoder.encode_rgba(img.as_ref()).map_err(Error::Encoding)?;
+    writer.write_all(&result.avif_file).map_err(Error::Io)?;
 
     Ok(())
 }
