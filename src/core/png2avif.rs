@@ -14,15 +14,20 @@ pub enum Error {
     Encoding(ravif::Error),
 }
 
-// TODO Add Result and errors comment
+/// # Errors
+///
+/// Returns an error if the conversion fails.
+///
+#[allow(clippy::cast_precision_loss)]
 pub fn convert<T>(config: &T) -> std::result::Result<(), Error>
 where
     T: PathAccessor + Dimensions + Quality,
 {
     let mut decoder = png::Decoder::new(File::open(config.input_path()).map_err(Error::Io)?);
-    decoder.set_transformations(png::Transformations::normalize_to_color8());
-    let mut reader = decoder.read_info().map_err(Error::Decoding)?;
 
+    decoder.set_transformations(png::Transformations::normalize_to_color8());
+
+    let mut reader = decoder.read_info().map_err(Error::Decoding)?;
     let mut buf = vec![0; reader.output_buffer_size()];
     let info = reader.next_frame(&mut buf).map_err(Error::Decoding)?;
     // println!("Color type: {:?}", reader.output_color_type());
@@ -64,6 +69,7 @@ where
         Lanczos3,
     )
     .map_err(Error::Resize)?;
+
     resizer
         .resize(src.as_rgba(), dest.as_rgba_mut())
         .map_err(Error::Resize)?;
