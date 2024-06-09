@@ -34,10 +34,12 @@ RUN cargo build
 
 FROM build as test
 
+RUN cargo install cargo-nextest --locked
+
 COPY ./examples ./examples
 COPY ./tests ./tests
 
-RUN cargo test --all-features
+RUN cargo nextest run --all-features
 
 FROM build as release
 
@@ -45,7 +47,7 @@ RUN cargo build --release --features=cli
 
 FROM base as checks
 
-RUN cargo install cargo-semver-checks cargo-audit cargo-outdated --locked
+RUN cargo install cargo-semver-checks cargo-audit cargo-outdated cargo-nextest --locked
 
 WORKDIR /app
 
@@ -53,7 +55,7 @@ COPY . ./
 
 RUN cargo outdated --exit-code 1
 
-RUN cargo test --all-features
+RUN cargo nextest run --all-features
 
 RUN cargo semver-checks
 
