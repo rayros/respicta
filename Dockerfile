@@ -1,4 +1,4 @@
-FROM rust:slim-bookworm as base
+FROM rust:slim-bookworm AS base
 
 WORKDIR /
 
@@ -6,7 +6,7 @@ RUN apt-get update \
  && apt-get -y install nasm curl build-essential cmake clang pkg-config libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp libwebp-dev libssl-dev \
  && rm -rfv /var/lib/apt/lists/*
 
-ENV MAGICK_VERSION 7.1.1-33
+ENV MAGICK_VERSION 7.1.1-38
 
 RUN curl https://imagemagick.org/archive/ImageMagick-${MAGICK_VERSION}.tar.gz | tar xz \
  && cd ImageMagick-${MAGICK_VERSION} \
@@ -18,7 +18,7 @@ RUN curl https://imagemagick.org/archive/ImageMagick-${MAGICK_VERSION}.tar.gz | 
 
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
-FROM base as build
+FROM base AS build
 
 RUN cargo new app
 
@@ -32,7 +32,7 @@ COPY ./src ./src
 
 RUN cargo build
 
-FROM build as test
+FROM build AS test
 
 RUN cargo install cargo-nextest --locked
 
@@ -41,11 +41,11 @@ COPY ./tests ./tests
 
 RUN cargo nextest run --all-features
 
-FROM build as release
+FROM build AS release
 
 RUN cargo build --release --features=cli
 
-FROM base as checks
+FROM base AS checks
 
 RUN cargo install cargo-semver-checks cargo-audit cargo-outdated cargo-nextest --locked
 
@@ -61,7 +61,7 @@ RUN cargo semver-checks
 
 RUN cargo audit
 
-FROM base as publish
+FROM base AS publish
 
 RUN cargo install cargo-semver-checks --locked
 
