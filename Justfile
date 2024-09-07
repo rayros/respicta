@@ -7,6 +7,9 @@ command-server:
 test:
   cargo test --all-features
 
+docker-checks:
+  docker build -t respicta . --target checks
+
 coverage: coverage-build coverage-lcov coverage-html
 
 coverage-build:

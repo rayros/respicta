@@ -32,6 +32,12 @@
             "type": "shell",
             "command": "just test",
             "problemMatcher": []
+        },
+        {
+            "label": "docker-checks",
+            "type": "shell",
+            "command": "just docker-checks",
+            "problemMatcher": []
         }
     ]
 }
