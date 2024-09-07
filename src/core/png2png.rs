@@ -43,6 +43,7 @@ where
 
 #[cfg(test)]
 mod tests {
+    use crate::ConfigBuilder;
 
     #[test]
     fn png2png_test1() {
@@ -61,12 +62,15 @@ mod tests {
     fn png2png_test2() {
         use super::*;
 
-        convert(&Config::new(
-            "tests/files/png2png_test2.png",
-            "target/png2png_test2.png",
-            Some(100),
-            Some(100),
-        ))
+        convert(
+            &ConfigBuilder::default()
+                .input_path("tests/files/png2png_test2.png")
+                .output_path("target/png2png_test2.png")
+                .width(Some(100))
+                .height(Some(100))
+                .build()
+                .unwrap(),
+        )
         .unwrap();
     }
 

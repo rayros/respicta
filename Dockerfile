@@ -1,12 +1,12 @@
-FROM rust:slim-bookworm as base
+FROM rust:1.79.0-slim-bullseye AS base
 
 WORKDIR /
 
 RUN apt-get update \
- && apt-get -y install curl build-essential cmake clang pkg-config libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp libwebp-dev libssl-dev \
+ && apt-get -y install nasm curl build-essential cmake clang pkg-config libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp libwebp-dev libssl-dev \
  && rm -rfv /var/lib/apt/lists/*
 
-ENV MAGICK_VERSION 7.1.1-33
+ENV MAGICK_VERSION=7.1.1-38
 
 RUN curl https://imagemagick.org/archive/ImageMagick-${MAGICK_VERSION}.tar.gz | tar xz \
  && cd ImageMagick-${MAGICK_VERSION} \
@@ -18,7 +18,7 @@ RUN curl https://imagemagick.org/archive/ImageMagick-${MAGICK_VERSION}.tar.gz | 
 
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
-FROM base as build
+FROM base AS build
 
 RUN cargo new app
 
@@ -32,32 +32,36 @@ COPY ./src ./src
 
 RUN cargo build
 
-FROM build as test
+FROM build AS test
+
+RUN cargo install cargo-nextest --locked
 
 COPY ./examples ./examples
 COPY ./tests ./tests
 
-RUN cargo test --all-features
+RUN cargo nextest run --all-features
 
-FROM build as release
+FROM build AS release
 
 RUN cargo build --release --features=cli
 
-FROM base as checks
+FROM base AS checks
 
-RUN cargo install cargo-semver-checks cargo-audit --locked
+RUN cargo install cargo-semver-checks cargo-audit cargo-outdated cargo-nextest --locked
 
 WORKDIR /app
 
 COPY . ./
 
-RUN cargo test --all-features
+RUN cargo outdated --exit-code 1
+
+RUN cargo nextest run --all-features
 
 RUN cargo semver-checks
 
 RUN cargo audit
 
-FROM base as publish
+FROM base AS publish
 
 RUN cargo install cargo-semver-checks --locked
 
@@ -70,7 +74,7 @@ RUN --mount=type=secret,id=CARGO_REGISTRY_TOKEN \
    && cargo semver-checks \
    && cargo publish
 
-FROM debian:bookworm-slim
+FROM debian:bullseye-slim
 
 RUN apt-get update \
  && apt-get -y install libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp libgomp1 \
