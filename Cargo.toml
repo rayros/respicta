@@ -7,7 +7,7 @@ readme = "README.md"
 license = "MIT"
 description = "Respicta is a versatile project offering a library, command-line interface (CLI), and web service for resizing images and changing their formats seamlessly."
 keywords = ["image", "resize", "convert", "cli", "web-service"]
-categories = ["image-processing", "cli", "web-service"]
+categories = ["multimedia::images", "command-line-interface", "web-programming::http-server"]
 exclude = [".github", ".vscode", "tests"]
 
 [dependencies]
