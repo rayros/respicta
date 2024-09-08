@@ -226,9 +226,9 @@ dependencies = [
 
 [[package]]
 name = "axum-test"
-version = "15.7.0"
+version = "15.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c13fee69ea6d727350c4fcb5f9100fda3b6b73bfae33da6b4acd3b6934f6e73"
+checksum = "05de9a36258224d347fb3c474737dee7543fe4c7ccebabd472d9151f730f5dcd"
 dependencies = [
  "anyhow",
  "auto-future",
@@ -1109,9 +1109,9 @@ dependencies = [
 
 [[package]]
 name = "ipnet"
-version = "2.9.0"
+version = "2.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f518f335dce6725a761382244631d86cf0ccb2863413590b31338feb467f9c3"
+checksum = "187674a687eed5fe42285b40c6291f9a01517d415fad1c3cbc6a9f778af7fcd4"
 
 [[package]]
 name = "is_terminal_polyfill"
