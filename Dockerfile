@@ -6,15 +6,13 @@ RUN apt-get update \
  && apt-get -y install nasm curl build-essential cmake clang pkg-config libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp libwebp-dev libssl-dev \
  && rm -rfv /var/lib/apt/lists/*
 
-ENV MAGICK_VERSION=7.1.1-38
-
-RUN curl https://imagemagick.org/archive/ImageMagick-${MAGICK_VERSION}.tar.gz | tar xz \
- && cd ImageMagick-${MAGICK_VERSION} \
+RUN curl https://imagemagick.org/archive/ImageMagick.tar.gz | tar xz \
+ && cd ImageMagick-* \
  && ./configure --with-magick-plus-plus=no --with-perl=no \
  && make \
  && make install \
  && cd .. \
- && rm -r ImageMagick-${MAGICK_VERSION}*
+ && rm -r ImageMagick-*
 
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
