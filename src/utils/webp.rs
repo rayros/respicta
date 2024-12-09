@@ -5,7 +5,7 @@ use std::{
 use thiserror::Error;
 
 use crate::{Dimensions, PathAccessor, Quality};
-use image::{io::Reader, GenericImageView};
+use image::{ImageReader, GenericImageView};
 use libwebp_sys::{
     VP8StatusCode, WebPConfig, WebPEncode, WebPEncodingError, WebPMemoryWrite, WebPMemoryWriter,
     WebPMemoryWriterClear, WebPMemoryWriterInit, WebPPicture, WebPPictureFree,
@@ -119,7 +119,7 @@ pub fn optimize<T>(config: &T) -> Result<(), Error>
 where
     T: PathAccessor + Dimensions + Quality,
 {
-    let input_image = Reader::open(config.input_path())
+    let input_image = ImageReader::open(config.input_path())
         .map_err(Error::Io)?
         .with_guessed_format()
         .map_err(Error::Io)?
