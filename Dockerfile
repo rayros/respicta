@@ -1,4 +1,4 @@
-FROM rust:1.79.0-slim-bullseye AS base
+FROM rust:1.83.0-slim-bullseye AS base
 
 WORKDIR /
 
