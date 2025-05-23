@@ -18,3 +18,5 @@ target/
 /coverage
 
 /target_coverage
+
+.direnv
