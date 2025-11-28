@@ -1,14 +1,30 @@
 use crate::{utils::magick, Dimensions, PathAccessor, Quality};
 
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("Magick error: {0}")]
+    Magick(magick::Error),
+}
+
+impl From<magick::Error> for Error {
+    fn from(err: magick::Error) -> Self {
+        Error::Magick(err)
+    }
+}
+
 /// # Errors
 ///
 /// Returns an error if the conversion fails.
 ///
-pub fn convert<T>(config: &T) -> std::result::Result<(), magick::Error>
+pub fn convert<T>(config: &T) -> std::result::Result<(), Error>
 where
     T: PathAccessor + Dimensions + Quality,
 {
-    magick::optimize(config, None)
+    magick::optimize(config, None)?;
+
+    Ok(())
 }
 
 #[cfg(test)]
