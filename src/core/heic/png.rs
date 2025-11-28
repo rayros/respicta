@@ -3,16 +3,13 @@ use std::{
     io::Cursor,
 };
 
-use crate::{
-    utils::{
-        fit,
-        webp::{rgba_to_webp, LibWebPError, RGBAImage},
-    },
-    Dimensions, PathAccessor, Quality,
-};
+use crate::{utils::fit, Dimensions, PathAccessor};
 use libheif_rs::{ColorSpace, HeifContext, HeifError, LibHeif, RgbChroma};
 use oxipng::{optimize_from_memory, Options};
 use png::{BitDepth, ColorType, Encoder};
+use resize::Pixel::RGBA8;
+use resize::Type::Lanczos3;
+use rgb::FromSlice;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -29,6 +26,8 @@ pub enum Error {
     Png(png::EncodingError),
     #[error("Optimization error: {0}")]
     Optimization(oxipng::PngError),
+    #[error("Resizing error: {0}")]
+    Resize(resize::Error),
 }
 
 impl From<HeifError> for Error {
@@ -55,13 +54,19 @@ impl From<oxipng::PngError> for Error {
     }
 }
 
+impl From<resize::Error> for Error {
+    fn from(err: resize::Error) -> Self {
+        Error::Resize(err)
+    }
+}
+
 /// # Errors
 ///
 /// Returns an error if the conversion fails.
 ///
 pub fn convert<T>(config: &T) -> std::result::Result<(), Error>
 where
-    T: PathAccessor + Dimensions + Quality,
+    T: PathAccessor + Dimensions,
 {
     let lib_heif = LibHeif::new();
     let name = config.input_path().to_str().ok_or(Error::WrongInputPath)?;
@@ -73,37 +78,48 @@ where
         config.width().unwrap_or(handle.width()),
         config.height().unwrap_or(handle.height()),
     );
-    let image = lib_heif
-        .decode(&handle, ColorSpace::Rgb(RgbChroma::Rgba), None)?
-        .scale(target_width, target_height, None)?;
+    let image = lib_heif.decode(&handle, ColorSpace::Rgb(RgbChroma::Rgba), None)?;
 
     let planes = image.planes();
     let interleaved_plane = planes.interleaved.ok_or(Error::NoInterleavedPlane)?;
 
+    let src = interleaved_plane.data.as_rgba();
+    let dst_size = target_width * target_height;
+    let mut dst = vec![rgb::RGBA8::new(0, 0, 0, 0); dst_size as usize];
+
+    let mut resizer = resize::new(
+        interleaved_plane.width as usize,
+        interleaved_plane.height as usize,
+        target_width as usize,
+        target_height as usize,
+        RGBA8,
+        Lanczos3,
+    )?;
+
+    resizer.resize(src, &mut dst)?;
+
+    let after_resize = dst
+        .iter()
+        .map(|px| [px.r, px.g, px.b, px.a])
+        .flatten()
+        .collect::<Vec<u8>>();
+
     let mut png_bytes: Vec<u8> = Vec::new();
     let cursor = Cursor::new(&mut png_bytes);
-    let mut encoder = Encoder::new(
-        cursor,
-        interleaved_plane.width as u32,
-        interleaved_plane.height as u32,
-    );
+    let mut encoder = Encoder::new(cursor, target_width as u32, target_height as u32);
     encoder.set_color(ColorType::Rgba);
     encoder.set_depth(BitDepth::Eight);
 
     let mut writer = encoder.write_header()?;
-    writer.write_image_data(&interleaved_plane.data)?;
+    writer.write_image_data(&after_resize)?;
     writer.finish()?;
 
     let options = &Options {
-        strip: oxipng::StripChunks::Safe, // Optionally, strip metadata
+        strip: oxipng::StripChunks::Safe,
         ..Options::default()
     };
 
-    // 2. Perform the optimization from memory
-    let optimized_bytes = optimize_from_memory(
-        &png_bytes, // Input unoptimized PNG data
-        &options,   // Optimization settings
-    )?;
+    let optimized_bytes = optimize_from_memory(&png_bytes, &options)?;
 
     if let Some(parent) = config.output_path().parent() {
         create_dir_all(parent)?;
@@ -137,6 +153,7 @@ mod tests {
 
         let result = convert(&config);
 
+        println!("{:?}", result);
         assert!(result.is_ok());
         assert!(output_path.exists());
     }
