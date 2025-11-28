@@ -4,3 +4,4 @@ pub const WEBP: &str = "webp";
 pub const JPG: &str = "jpg";
 pub const JPEG: &str = "jpeg";
 pub const JFIF: &str = "jfif";
+pub const HEIC: &str = "heic";

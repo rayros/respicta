@@ -8,9 +8,9 @@ pub mod extensions;
 pub mod server;
 pub mod utils;
 
-use core::{gif2gif, gif2webp, jpeg2jpeg, jpeg2webp, png2jpeg, png2png, png2webp, webp2webp};
+use core::{gif2gif, gif2webp, jpeg2jpeg, jpeg2webp, png2jpeg, png2png, png2webp, webp2webp, heic};
 use derive_builder::Builder;
-use extensions::{GIF, JFIF, JPEG, JPG, PNG, WEBP};
+use extensions::{GIF, JFIF, JPEG, JPG, PNG, WEBP, HEIC};
 use std::path::{Path, PathBuf};
 use thiserror::Error;
 use utils::{gifsicle, magick, webp};
@@ -110,6 +110,8 @@ pub enum Error {
     Gif2Webp(gif2webp::Error),
     #[error("Error converting webp to webp: {0}")]
     Webp2Webp(webp::Error),
+    #[error("Error converting heic to webp: {0}")]
+    Heic2Webp(heic::webp::Error),
 }
 
 /// # Errors
@@ -145,6 +147,7 @@ pub fn convert(config: &Config) -> Result<(), Error> {
                 }
                 (PNG, PNG) => png2png::convert(config).map_err(Error::Png2Png),
                 (PNG, JPG | JPEG | JFIF) => png2jpeg::convert(config).map_err(Error::Png2Jpeg),
+                (HEIC, WEBP) => heic::webp::convert(config).map_err(Error::Heic2Webp),
                 (input_extension, output_extension) => Err(Error::UnsupportedConversion(
                     input_extension.to_string(),
                     output_extension.to_string(),
