@@ -1,9 +1,9 @@
-FROM rust:1.83.0-slim-bullseye AS base
+FROM rust:1.88.0-slim-trixie AS base
 
 WORKDIR /
 
 RUN apt-get update \
- && apt-get -y install nasm curl build-essential cmake clang pkg-config libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp libwebp-dev libssl-dev \
+ && apt-get -y install nasm curl build-essential cmake clang pkg-config libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp libwebp-dev libssl-dev libheif-dev \
  && rm -rfv /var/lib/apt/lists/*
 
 RUN curl https://imagemagick.org/archive/ImageMagick.tar.gz | tar xz \
@@ -72,10 +72,10 @@ RUN --mount=type=secret,id=CARGO_REGISTRY_TOKEN \
    && cargo semver-checks \
    && cargo publish
 
-FROM debian:bullseye-slim
+FROM debian:slim-trixie
 
 RUN apt-get update \
- && apt-get -y install libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp libgomp1 \
+ && apt-get -y install libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp libgomp1 libheif libheif-dev \
  && rm -rfv /var/lib/apt/lists/*
 
 COPY --from=release /usr/local/lib /usr/local/lib

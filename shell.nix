@@ -30,6 +30,7 @@ pkgs.mkShell {
     just
     gifsicle
     libheif
+    lldb
   ];
 
   shellHook = ''
