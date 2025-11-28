@@ -13,7 +13,7 @@ use derive_builder::Builder;
 use extensions::{GIF, HEIC, JFIF, JPEG, JPG, PNG, WEBP};
 use std::path::{Path, PathBuf};
 use thiserror::Error;
-use utils::{gifsicle};
+use utils::gifsicle;
 
 pub trait PathAccessor {
     fn input_path(&self) -> &PathBuf;
@@ -114,6 +114,8 @@ pub enum Error {
     Heic2Webp(heic::webp::Error),
     #[error("Error converting heic to png: {0}")]
     Heic2Png(heic::png::Error),
+    #[error("Error converting heic to jpeg: {0}")]
+    Heic2Jpeg(heic::jpeg::Error),
 }
 
 impl From<gif2webp::Error> for Error {
@@ -176,6 +178,12 @@ impl From<heic::png::Error> for Error {
     }
 }
 
+impl From<heic::jpeg::Error> for Error {
+    fn from(err: heic::jpeg::Error) -> Self {
+        Error::Heic2Jpeg(err)
+    }
+}
+
 /// # Errors
 ///
 /// Returns an error if:
@@ -217,6 +225,7 @@ fn _convert(input_extension: &str, output_extension: &str, config: &Config) -> R
         (PNG, JPG | JPEG | JFIF) => Ok(png2jpeg::convert(config)?),
         (HEIC, WEBP) => Ok(heic::webp::convert(config)?),
         (HEIC, PNG) => Ok(heic::png::convert(config)?),
+        (HEIC, JPG | JPEG | JFIF) => Ok(heic::jpeg::convert(config)?),
         (input_extension, output_extension) => Err(Error::UnsupportedConversion(
             input_extension.to_string(),
             output_extension.to_string(),

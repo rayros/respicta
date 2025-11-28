@@ -1,4 +1,3 @@
-use imgref::ImgExt;
 use rgb::FromSlice;
 
 use crate::{utils::fit, Dimensions, PathAccessor, Quality};
@@ -81,7 +80,7 @@ where
         encoder = encoder.with_quality(quality as f32);
     }
 
-    let result = encoder.encode_rgba(img.as_ref()).map_err(Error::Encoding)?;
+    let result = encoder.encode_rgba(img).map_err(Error::Encoding)?;
     writer.write_all(&result.avif_file).map_err(Error::Io)?;
 
     Ok(())

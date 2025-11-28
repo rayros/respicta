@@ -26,10 +26,10 @@ serde = { version = "1.0.215", features = ["derive"], optional = true }
 derive_builder = "0.20.2"
 ravif = "0.11.10"
 png = "0.17.15"
-imgref = "1.11.0"
 rgb = "0.8.50"
 resize = "0.8.8"
 libheif-rs = { version = "2.5.1", default-features = false, features = ["v1_19"] }
+jpeg-encoder = "0.6.1"
 
 [dev-dependencies]
 axum-test = "16.4.0"
