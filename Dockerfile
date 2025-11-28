@@ -1,4 +1,4 @@
-FROM rust:1.88.0-slim-trixie AS base
+FROM rust:1.89.0-slim-trixie AS base
 
 WORKDIR /
 
@@ -45,7 +45,8 @@ RUN cargo build --release --features=cli
 
 FROM base AS checks
 
-RUN cargo install cargo-semver-checks cargo-audit cargo-outdated cargo-nextest --locked
+RUN cargo install cargo-semver-checks --locked
+RUN cargo install cargo-audit cargo-outdated cargo-nextest --locked
 
 WORKDIR /app
 
