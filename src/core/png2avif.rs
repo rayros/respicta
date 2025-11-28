@@ -1,8 +1,9 @@
+use png::Decoder;
 use rgb::FromSlice;
 
 use crate::{utils::fit, Dimensions, PathAccessor, Quality};
 use resize::Type::Lanczos3;
-use std::{fs::File, io::Write};
+use std::{fs::File, io::{BufReader, Write}};
 
 #[derive(Debug)]
 pub enum Error {
@@ -11,6 +12,13 @@ pub enum Error {
     UnsupportedColorType(png::ColorType),
     Resize(resize::Error),
     Encoding(ravif::Error),
+    OutOfMemory,
+}
+
+impl From<png::DecodingError> for Error {
+    fn from(err: png::DecodingError) -> Self {
+        Error::Decoding(err)
+    }
 }
 
 /// # Errors
@@ -22,13 +30,21 @@ pub fn convert<T>(config: &T) -> std::result::Result<(), Error>
 where
     T: PathAccessor + Dimensions + Quality,
 {
-    let mut decoder = png::Decoder::new(File::open(config.input_path()).map_err(Error::Io)?);
+    let file = File::open(config.input_path()).map_err(Error::Io)?;
+    let f = BufReader::new(file);
+
+    let mut decoder = Decoder::new(f);
 
     decoder.set_transformations(png::Transformations::normalize_to_color8());
 
-    let mut reader = decoder.read_info().map_err(Error::Decoding)?;
-    let mut buf = vec![0; reader.output_buffer_size()];
-    let info = reader.next_frame(&mut buf).map_err(Error::Decoding)?;
+    let mut reader = decoder.read_info()?;
+
+    let Some(buffer_size) = reader.output_buffer_size() else {
+        return Err(Error::OutOfMemory);
+    };
+
+    let mut buf = vec![0; buffer_size];
+    let info = reader.next_frame(&mut buf)?;
     // println!("Color type: {:?}", reader.output_color_type());
     // println!("Bit depth: {:?}", info.bit_depth);
     // println!("Buffer size: {:?}", reader.output_buffer_size());
