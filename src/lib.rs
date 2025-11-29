@@ -8,12 +8,12 @@ pub mod extensions;
 pub mod server;
 pub mod utils;
 
-use core::{gif2gif, gif2webp, jpeg2jpeg, jpeg2webp, png2jpeg, png2png, png2webp, webp2webp};
+use core::{gif2gif, gif2webp, heic, jpeg2jpeg, jpeg2webp, png2jpeg, png2png, png2webp, webp2webp};
 use derive_builder::Builder;
-use extensions::{GIF, JFIF, JPEG, JPG, PNG, WEBP};
+use extensions::{GIF, HEIC, JFIF, JPEG, JPG, PNG, WEBP};
 use std::path::{Path, PathBuf};
 use thiserror::Error;
-use utils::{gifsicle, magick, webp};
+use utils::gifsicle;
 
 pub trait PathAccessor {
     fn input_path(&self) -> &PathBuf;
@@ -97,19 +97,91 @@ pub enum Error {
     #[error("Error converting png to png: {0}")]
     Png2Png(png2png::Error),
     #[error("Error converting png to jpg: {0}")]
-    Png2Jpeg(magick::Error),
+    Png2Jpeg(png2jpeg::Error),
     #[error("Error converting png to webp: {0}")]
-    Png2Webp(webp::Error),
+    Png2Webp(png2webp::Error),
     #[error("Error converting jpg to jpg: {0}")]
-    Jpeg2Jpeg(magick::Error),
+    Jpeg2Jpeg(jpeg2jpeg::Error),
     #[error("Error converting jpg to webp: {0}")]
-    Jpeg2Webp(webp::Error),
+    Jpeg2Webp(jpeg2webp::Error),
     #[error("Error converting gif to gif: {0}")]
     Gif2Gif(gifsicle::Error),
     #[error("Error converting gif to webp: {0}")]
     Gif2Webp(gif2webp::Error),
     #[error("Error converting webp to webp: {0}")]
-    Webp2Webp(webp::Error),
+    Webp2Webp(webp2webp::Error),
+    #[error("Error converting heic to webp: {0}")]
+    Heic2Webp(heic::webp::Error),
+    #[error("Error converting heic to png: {0}")]
+    Heic2Png(heic::png::Error),
+    #[error("Error converting heic to jpeg: {0}")]
+    Heic2Jpeg(heic::jpeg::Error),
+}
+
+impl From<gif2webp::Error> for Error {
+    fn from(err: gif2webp::Error) -> Self {
+        Error::Gif2Webp(err)
+    }
+}
+
+impl From<gifsicle::Error> for Error {
+    fn from(err: gifsicle::Error) -> Self {
+        Error::Gif2Gif(err)
+    }
+}
+
+impl From<png2webp::Error> for Error {
+    fn from(err: png2webp::Error) -> Self {
+        Error::Png2Webp(err)
+    }
+}
+
+impl From<jpeg2jpeg::Error> for Error {
+    fn from(err: jpeg2jpeg::Error) -> Self {
+        Error::Jpeg2Jpeg(err)
+    }
+}
+
+impl From<webp2webp::Error> for Error {
+    fn from(err: webp2webp::Error) -> Self {
+        Error::Webp2Webp(err)
+    }
+}
+
+impl From<png2png::Error> for Error {
+    fn from(err: png2png::Error) -> Self {
+        Error::Png2Png(err)
+    }
+}
+
+impl From<jpeg2webp::Error> for Error {
+    fn from(err: jpeg2webp::Error) -> Self {
+        Error::Jpeg2Webp(err)
+    }
+}
+
+impl From<png2jpeg::Error> for Error {
+    fn from(err: png2jpeg::Error) -> Self {
+        Error::Png2Jpeg(err)
+    }
+}
+
+impl From<heic::webp::Error> for Error {
+    fn from(err: heic::webp::Error) -> Self {
+        Error::Heic2Webp(err)
+    }
+}
+
+impl From<heic::png::Error> for Error {
+    fn from(err: heic::png::Error) -> Self {
+        Error::Heic2Png(err)
+    }
+}
+
+impl From<heic::jpeg::Error> for Error {
+    fn from(err: heic::jpeg::Error) -> Self {
+        Error::Heic2Jpeg(err)
+    }
 }
 
 /// # Errors
@@ -134,26 +206,33 @@ pub fn convert(config: &Config) -> Result<(), Error> {
             .map(str::to_lowercase),
     ) {
         (Some(input_extension), Some(output_extension)) => {
-            match (input_extension.as_str(), output_extension.as_str()) {
-                (GIF, GIF) => gif2gif::convert(config).map_err(Error::Gif2Gif),
-                (GIF, WEBP) => gif2webp::convert(config).map_err(Error::Gif2Webp),
-                (PNG, WEBP) => png2webp::convert(config).map_err(Error::Png2Webp),
-                (WEBP, WEBP) => webp2webp::convert(config).map_err(Error::Webp2Webp),
-                (JPG | JPEG | JFIF, WEBP) => jpeg2webp::convert(config).map_err(Error::Jpeg2Webp),
-                (JPG | JPEG | JFIF, JPG | JPEG | JFIF) => {
-                    jpeg2jpeg::convert(config).map_err(Error::Jpeg2Jpeg)
-                }
-                (PNG, PNG) => png2png::convert(config).map_err(Error::Png2Png),
-                (PNG, JPG | JPEG | JFIF) => png2jpeg::convert(config).map_err(Error::Png2Jpeg),
-                (input_extension, output_extension) => Err(Error::UnsupportedConversion(
-                    input_extension.to_string(),
-                    output_extension.to_string(),
-                )),
-            }
+            _convert(&input_extension, &output_extension, config)
         }
         (None, _) => Err(Error::InputFileHasNoExtension),
         (_, None) => Err(Error::OutputFileHasNoExtension),
     }
+}
+
+fn _convert(input_extension: &str, output_extension: &str, config: &Config) -> Result<(), Error> {
+    let result: Result<(), Error> = match (input_extension, output_extension) {
+        (GIF, GIF) => Ok(gif2gif::convert(config)?),
+        (GIF, WEBP) => Ok(gif2webp::convert(config)?),
+        (PNG, WEBP) => Ok(png2webp::convert(config)?),
+        (WEBP, WEBP) => Ok(webp2webp::convert(config)?),
+        (JPG | JPEG | JFIF, WEBP) => Ok(jpeg2webp::convert(config)?),
+        (JPG | JPEG | JFIF, JPG | JPEG | JFIF) => Ok(jpeg2jpeg::convert(config)?),
+        (PNG, PNG) => Ok(png2png::convert(config)?),
+        (PNG, JPG | JPEG | JFIF) => Ok(png2jpeg::convert(config)?),
+        (HEIC, WEBP) => Ok(heic::webp::convert(config)?),
+        (HEIC, PNG) => Ok(heic::png::convert(config)?),
+        (HEIC, JPG | JPEG | JFIF) => Ok(heic::jpeg::convert(config)?),
+        (input_extension, output_extension) => Err(Error::UnsupportedConversion(
+            input_extension.to_string(),
+            output_extension.to_string(),
+        )),
+    };
+
+    result
 }
 
 #[cfg(test)]
@@ -276,7 +355,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "Jpeg2Webp(Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" }))"]
+    #[should_panic = "Jpeg2Webp(WebP(Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })))"]
     fn convert_panic_jpg_to_webp() {
         use super::*;
 
@@ -290,7 +369,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "Jpeg2Jpeg(Magick(MagickError(\"unable to open image 'tests/files/not_existing.jpg':"]
+    #[should_panic = "Jpeg2Jpeg(Magick(Magick(MagickError(\"unable to open image 'tests/files/not_existing.jpg':"]
     fn convert_panic_jpg_to_jpg() {
         use super::*;
 
@@ -318,7 +397,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "Webp2Webp(Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" }))"]
+    #[should_panic = "Webp2Webp(WebP(Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })))"]
     fn convert_panic_webp_to_webp() {
         use super::*;
 
@@ -388,7 +467,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "Png2Webp(Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" }))"]
+    #[should_panic = "Png2Webp(WebP(Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })))"]
     fn convert_panic_png_to_webp() {
         use super::*;
 
@@ -402,7 +481,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "Png2Jpeg(Magick(MagickError(\"unable to open image 'tests/files/not_existing.png':"]
+    #[should_panic = "Png2Jpeg(Magick(Magick(MagickError(\"unable to open image 'tests/files/not_existing.png':"]
     fn convert_panic_png_to_jpg() {
         use super::*;
 

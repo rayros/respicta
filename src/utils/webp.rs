@@ -34,7 +34,7 @@ pub enum LibWebPError {
     TryFromIntError(#[from] std::num::TryFromIntError),
 }
 
-fn rgba_to_webp<T>(image: &RGBAImage, config: &T) -> Result<Vec<u8>, LibWebPError>
+pub(crate) fn rgba_to_webp<T>(image: &RGBAImage, config: &T) -> Result<Vec<u8>, LibWebPError>
 where
     T: Dimensions + Quality,
 {

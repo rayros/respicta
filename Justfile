@@ -10,6 +10,9 @@ test:
 docker-checks:
   docker build -t respicta . --target checks
 
+docker-build-server:
+  docker build -t respicta .
+
 coverage: coverage-build coverage-lcov coverage-html
 
 coverage-build:

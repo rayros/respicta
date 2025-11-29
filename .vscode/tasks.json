@@ -38,6 +38,12 @@
             "type": "shell",
             "command": "just docker-checks",
             "problemMatcher": []
+        },
+        {
+            "label": "docker-build-server",
+            "type": "shell",
+            "command": "just docker-build-server",
+            "problemMatcher": []
         }
     ]
 }

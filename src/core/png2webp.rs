@@ -1,7 +1,21 @@
 use crate::{
-    utils::webp::{self, Error},
+    utils::webp::{self},
     Dimensions, PathAccessor, Quality,
 };
+
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("PNG to WebP conversion error: {0}")]
+    WebP(webp::Error),
+}
+
+impl From<webp::Error> for Error {
+    fn from(err: webp::Error) -> Self {
+        Error::WebP(err)
+    }
+}
 
 /// # Errors
 ///
@@ -11,7 +25,9 @@ pub fn convert<T>(config: &T) -> Result<(), Error>
 where
     T: PathAccessor + Dimensions + Quality,
 {
-    webp::optimize(config)
+    webp::optimize(config)?;
+
+    Ok(())
 }
 
 #[cfg(test)]
