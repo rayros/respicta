@@ -11,6 +11,7 @@ pub mod png2jpeg;
 pub mod png2png;
 pub mod png2webp;
 pub mod webp2webp;
+pub mod heic;
 
 pub struct PathIO<'a> {
     input_path: &'a PathBuf,

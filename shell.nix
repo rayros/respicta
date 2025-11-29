@@ -29,6 +29,8 @@ pkgs.mkShell {
     llvmPackages.libclang
     just
     gifsicle
+    libheif
+    lldb
   ];
 
   shellHook = ''
