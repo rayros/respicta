@@ -73,10 +73,10 @@ RUN --mount=type=secret,id=CARGO_REGISTRY_TOKEN \
    && cargo semver-checks \
    && cargo publish
 
-FROM debian:slim-trixie
+FROM debian:trixie-slim
 
 RUN apt-get update \
- && apt-get -y install libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp libgomp1 libheif libheif-dev \
+ && apt-get -y install libjpeg-turbo-progs libjpeg-dev libpng-dev gifsicle webp libgomp1 libheif-dev \
  && rm -rfv /var/lib/apt/lists/*
 
 COPY --from=release /usr/local/lib /usr/local/lib
