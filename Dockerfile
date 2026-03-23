@@ -1,4 +1,4 @@
-FROM rust:1.89.0-slim-trixie AS base
+FROM rust:1.92.0-slim-trixie AS base
 
 WORKDIR /
 
