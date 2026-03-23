@@ -24,6 +24,9 @@ where
     T: PathAccessor + Dimensions,
 {
     let output_path = config.output_path();
+    if let Some(parent) = output_path.parent() {
+        std::fs::create_dir_all(parent).map_err(Error::Io)?;
+    }
     let step1_output_path = &output_path.with_extension("step1");
     let gifsicle_config = Config::new(
         config.input_path(),
@@ -49,6 +52,19 @@ mod tests {
         convert(&Config::new(
             "tests/files/gif2webp_test1.gif",
             "target/gif2webp_test1.webp",
+            Some(100),
+            Some(100),
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    fn gif2webp_subdir() {
+        use super::*;
+
+        convert(&Config::new(
+            "tests/files/gif2webp_test1.gif",
+            "target/gif2webp/subdir/gif2webp_test1.webp",
             Some(100),
             Some(100),
         ))
